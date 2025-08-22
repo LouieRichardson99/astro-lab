@@ -1,0 +1,46 @@
+---
+import type { ComponentData } from '../types';
+import ComponentPropsInput from './ComponentPropsInput.astro';
+
+interface Props {
+  component: ComponentData;
+}
+
+const { component } = Astro.props;
+---
+
+<div>
+  <table class="component-props">
+    <thead>
+      <tr>
+        <th class="prop-name-column">Prop</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        component.component.props.map((prop) => (
+          <tr>
+            <td class="prop-name-column">
+              <pre class="prop-name">{prop.name}</pre>
+            </td>
+            <td>
+              <ComponentPropsInput {prop} value={component.props[prop.name]} />
+            </td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+
+<style lang="scss">
+  .prop-name-column {
+    min-width: max-content;
+    width: 20rem;
+  }
+
+  .prop-name {
+    font-size: 1.4rem;
+  }
+</style>

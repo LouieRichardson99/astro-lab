@@ -1,0 +1,66 @@
+---
+import type { ComponentData } from '../types';
+
+interface Props {
+  component: ComponentData;
+}
+
+const { component } = Astro.props;
+---
+
+<component-slots>
+  <table class="component-slots">
+    <thead>
+      <tr>
+        <th>Slot</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        component.component.slots.map((slot) => (
+          <tr>
+            <td>
+              <pre>{slot.name}</pre>
+            </td>
+            <td>
+              <input
+                type="text"
+                value={component.slots[slot.name]}
+                name={slot.name}
+              />
+            </td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</component-slots>
+
+<script>
+  class ComponentSlots extends HTMLElement {
+    connectedCallback() {
+      const inputs = this.querySelectorAll('input');
+
+      inputs.forEach((input) => {
+        input.addEventListener('change', (event: Event) => {
+          let value = (event.target as HTMLInputElement).value.trim();
+          const name = (event.target as HTMLInputElement).name;
+
+          fetch('/_astrolab/api/component', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              slot: name,
+              value: value! ? value : undefined
+            })
+          }).then(() => {
+            document.dispatchEvent(new Event('component-updated'));
+          });
+        });
+      });
+    }
+  }
+
+  customElements.define('component-slots', ComponentSlots);
+</script>

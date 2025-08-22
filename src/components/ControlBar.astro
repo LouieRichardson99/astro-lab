@@ -1,0 +1,113 @@
+---
+import BottomDrawerIcon from '../icons/bottom-drawer.svg';
+import HashIcon from '../icons/hash.svg';
+import ZoomInIcon from '../icons/zoom-in.svg';
+import ZoomOutIcon from '../icons/zoom-out.svg';
+import RefreshIcon from '../icons/refresh.svg';
+
+interface Props {
+  componentPath: string;
+}
+
+const { componentPath } = Astro.props;
+---
+
+<div class="control-bar">
+  <button
+    class="control-button"
+    aria-label="Toggle component controls"
+    data-action="toggle-controls"
+  >
+    <BottomDrawerIcon />
+  </button>
+  <button
+    class="control-button"
+    aria-label="Toggle grid"
+    data-action="toggle-grid"
+  >
+    <HashIcon />
+  </button>
+  <span class="spacer"></span>
+  <button class="control-button" aria-label="Zoom in" data-action="zoom-in">
+    <ZoomInIcon />
+  </button>
+  <button class="control-button" aria-label="Zoom out" data-action="zoom-out">
+    <ZoomOutIcon />
+  </button>
+  <button
+    class="control-button"
+    aria-label="Reset zoom"
+    data-action="zoom-reset"
+  >
+    <RefreshIcon />
+  </button>
+  {
+    componentPath && (
+      <a href={`vscode://file/${componentPath}`} class="file-path-link">
+        <pre class="file-path">{componentPath}</pre>
+      </a>
+    )
+  }
+</div>
+
+<style lang="scss">
+  .control-bar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 1.5rem;
+    height: var(--control-bar-height);
+  }
+
+  .control-button {
+    background: none;
+    display: flex;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+
+    svg {
+      height: 2.2rem;
+      width: 2.2rem;
+      color: color-mix(in srgb, var(--icon-color), hsl(0, 0%, 50%));
+    }
+  }
+
+  .spacer {
+    width: 1rem;
+  }
+
+  .file-path-link {
+    color: color-mix(in srgb, var(--color), hsl(0, 0%, 80%));
+    text-decoration: none;
+    margin-left: auto;
+    transition: color var(--global-animation-speed) ease;
+
+    &:hover,
+    &:focus {
+      color: var(--color);
+    }
+  }
+
+  .file-path {
+    font-size: 1rem;
+    color: inherit;
+    margin: 0;
+  }
+</style>
+
+<script>
+  const controlButtons = document.querySelectorAll('.control-button');
+
+  controlButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const action = button.getAttribute('data-action');
+
+      if (action) {
+        document.dispatchEvent(new CustomEvent(action));
+      }
+    });
+  });
+</script>

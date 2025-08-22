@@ -1,0 +1,86 @@
+---
+import type { PropInfo } from '../types';
+import isPrimitiveUnion from '../utils/isPrimitiveUnion';
+
+export interface Props {
+  prop: PropInfo;
+  value: unknown;
+}
+
+const { prop, value } = Astro.props;
+const { type } = prop;
+---
+
+<component-props-input>
+  {
+    isPrimitiveUnion(type) && (
+      <select name={prop.name}>
+        {type.types.map((option) => (
+          <option value={option.name} selected={option.name === value}>
+            {option.name}
+          </option>
+        ))}
+      </select>
+    )
+  }
+
+  {
+    type.kind === 'primitive' && (
+      <Fragment>
+        {type.name === 'string' && (
+          <input type="text" value={value as string} name={prop.name} />
+        )}
+        {type.name === 'number' && (
+          <input type="number" value={value as number} name={prop.name} />
+        )}
+        {type.name === 'boolean' && (
+          <select name={prop.name}>
+            <option value="true" selected={value === 'true'}>
+              True
+            </option>
+            <option value="false" selected={value === 'false'}>
+              False
+            </option>
+          </select>
+        )}
+      </Fragment>
+    )
+  }
+
+  {type.kind === 'unknown' && <span>Unknown type</span>}
+</component-props-input>
+
+<style>
+  input,
+  select {
+    min-width: 20rem;
+  }
+</style>
+
+<script>
+  class ComponentPropsInput extends HTMLElement {
+    connectedCallback() {
+      const input = this.querySelector('input, select');
+
+      if (input) {
+        input.addEventListener('change', (event: Event) => {
+          const value = (
+            event.target as HTMLInputElement | HTMLSelectElement
+          ).value.trim();
+          const name = (event.target as HTMLInputElement | HTMLSelectElement)
+            .name;
+
+          fetch('/_astrolab/api/component', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prop: name, value })
+          }).then(() => {
+            document.dispatchEvent(new Event('component-updated'));
+          });
+        });
+      }
+    }
+  }
+
+  customElements.define('component-props-input', ComponentPropsInput);
+</script>

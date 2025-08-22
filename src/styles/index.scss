@@ -1,0 +1,55 @@
+@use 'reset';
+@use 'typography';
+@use 'form';
+
+:root {
+  --primary-color: hsl(209, 49%, 44%);
+  --sidebar-bg-color: hsl(197, 100%, 99%);
+  --sidebar-border-color: hsl(0, 0%, 90%);
+  --border-color: hsl(0, 0%, 90%);
+  --icon-color: hsl(199, 23%, 27%);
+  --color: hsl(0, 0%, 10%);
+  --control-bar-height: 4.5rem;
+  --global-animation-speed: 0.25s;
+}
+
+html {
+  font-family: 'system-ui', sans-serif;
+  font-size: 62.5%;
+  -webkit-font-smoothing: antialiased;
+}
+
+table {
+  font-size: 1.6rem;
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+
+  tr {
+    padding: 0 1.5rem;
+    display: block;
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--border-color), hsl(0, 0%, 100%) 50%);
+  }
+
+  th {
+    font-weight: 400;
+  }
+
+  tbody {
+    tr {
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+
+  th,
+  td {
+    padding: 1.25rem 0;
+  }
+
+  pre {
+    margin: 0;
+  }
+}

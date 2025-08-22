@@ -1,0 +1,190 @@
+---
+import XCircleIcon from '../icons/x-circle.svg';
+---
+
+<control-panel>
+  <div class="control-panel" data-open="false" aria-hidden="true">
+    <div class="tabs-container" role="tablist" aria-orientation="horizontal">
+      <button
+        id="props-tab"
+        class="tab"
+        role="tab"
+        aria-selected="true"
+        aria-controls="props"
+      >
+        Props
+      </button>
+      <button
+        id="slots-tab"
+        class="tab"
+        role="tab"
+        aria-selected="false"
+        aria-controls="slots"
+      >
+        Slots
+      </button>
+      <button aria-label="Close control panel" class="close-button">
+        <XCircleIcon />
+      </button>
+    </div>
+    <div class="tabs-content">
+      <div
+        id="props"
+        class="tab-panel"
+        role="tabpanel"
+        aria-labelledby="props-tab"
+        aria-hidden="false"
+      >
+        <slot name="props" />
+      </div>
+      <div
+        id="slots"
+        class="tab-panel"
+        role="tabpanel"
+        aria-labelledby="slots-tab"
+        aria-hidden="true"
+      >
+        <slot name="slots" />
+      </div>
+    </div>
+  </div>
+</control-panel>
+
+<style lang="scss">
+  .control-panel {
+    background-color: hsl(0, 0%, 100%);
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+    height: 50vh;
+    min-height: 30rem;
+    overflow-y: auto;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      transform var(--global-animation-speed) ease,
+      visibility 0s linear var(--global-animation-speed);
+  }
+
+  .control-panel[aria-hidden='false'] {
+    transform: translateY(-100%);
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      transform var(--global-animation-speed) ease,
+      visibility 0s;
+  }
+
+  .tabs-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+  }
+
+  .tab {
+    font-size: 1.5rem;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 3rem;
+    transition: background-color var(--global-animation-speed) ease;
+    cursor: pointer;
+
+    &:hover,
+    &:focus {
+      background-color: color-mix(
+        in srgb,
+        var(--primary-color),
+        hsl(0, 0%, 100%) 90%
+      );
+    }
+
+    &[aria-selected='true'] {
+      background-color: color-mix(
+        in srgb,
+        var(--primary-color),
+        hsl(0, 0%, 100%) 90%
+      );
+
+      &:hover,
+      &:focus {
+        background-color: color-mix(
+          in srgb,
+          var(--primary-color),
+          hsl(0, 0%, 100%) 80%
+        );
+      }
+    }
+  }
+
+  .tab-panel {
+    &[aria-hidden='true'] {
+      display: none;
+    }
+  }
+
+  .tabs-content {
+    padding-bottom: 1rem;
+  }
+
+  .close-button {
+    background: none;
+    display: flex;
+    border: none;
+    margin-left: auto;
+    padding: 0;
+    cursor: pointer;
+
+    svg {
+      color: var(--icon-color);
+    }
+  }
+</style>
+
+<script>
+  class ControlPanel extends HTMLElement {
+    controlPanel = this.querySelector('.control-panel') as HTMLElement;
+    tabsContainer = this.querySelector('.tabs-container') as HTMLElement;
+    tabs = this.querySelectorAll('.tab') as NodeListOf<HTMLElement>;
+    closeButton = this.querySelector('.close-button') as HTMLElement;
+
+    connectedCallback() {
+      this.tabs.forEach((tab) => {
+        tab.addEventListener('click', (e) => {
+          this.#onTabClick(e);
+        });
+      });
+
+      this.closeButton.addEventListener('click', () => {
+        this.controlPanel?.setAttribute('aria-hidden', 'true');
+      });
+
+      document.addEventListener('toggle-controls', () => {
+        const isOpen =
+          this.controlPanel?.getAttribute('aria-hidden') === 'true';
+
+        this.controlPanel?.setAttribute('aria-hidden', String(!isOpen));
+      });
+    }
+
+    #onTabClick(e: Event) {
+      const target = e.target as HTMLElement;
+
+      this.tabs.forEach((tab) => {
+        const panelId = tab.getAttribute('aria-controls');
+        const panel = this.querySelector(`#${panelId}`) as HTMLElement | null;
+
+        if (tab === target) {
+          tab.setAttribute('aria-selected', 'true');
+          panel?.setAttribute('aria-hidden', 'false');
+        } else {
+          tab.setAttribute('aria-selected', 'false');
+          panel?.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+  }
+
+  customElements.define('control-panel', ControlPanel);
+</script>

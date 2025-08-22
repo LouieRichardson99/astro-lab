@@ -1,0 +1,147 @@
+---
+import getListOfComponents from '../lib/getListOfComponents';
+import type { ComponentData } from '../types';
+import CodeFolderIcon from '../icons/code-folder.svg';
+
+interface Props {
+  component: ComponentData | null;
+}
+
+const { component } = Astro.props;
+
+const components = await getListOfComponents();
+---
+
+<aside>
+  <astro-sidebar>
+    <div class="sidebar">
+      <p class="title">Astrolab</p>
+      <div>
+        <p class="list-title">
+          <CodeFolderIcon />
+          Components
+        </p>
+        {
+          components ? (
+            <nav>
+              <ul class="component-list">
+                {components.map((comp) => (
+                  <li>
+                    <button
+                      class:list={[
+                        'component-button',
+                        { active: component?.component.name === comp.name }
+                      ]}
+                      data-component-name={comp.name}
+                    >
+                      {comp.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ) : (
+            <p>No components found.</p>
+          )
+        }
+      </div>
+    </div>
+  </astro-sidebar>
+</aside>
+
+<style lang="scss">
+  .sidebar {
+    background-color: var(--sidebar-bg-color);
+    border-right: 1px solid var(--border-color);
+    position: relative;
+    color: var(--color);
+    width: 25rem;
+    height: 100vh;
+    padding: 1rem 1.5rem;
+  }
+
+  .title {
+    font-size: 2rem;
+    font-weight: 300;
+    margin-bottom: 3rem;
+  }
+
+  .list-title {
+    font-weight: 300;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    svg {
+      width: 1.75rem;
+      height: 1.75rem;
+      color: var(--icon-color);
+    }
+  }
+
+  .component-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .component-button {
+    font-weight: 300;
+    font-size: 1.6rem;
+    border-radius: 5px;
+    width: 100%;
+    border: none;
+    background: none;
+    padding: 0.5rem 1.25rem;
+    cursor: pointer;
+    transition: all var(--global-animation-speed) ease;
+    text-align: left;
+
+    &.active {
+      background-color: color-mix(
+        in srgb,
+        var(--primary-color),
+        hsl(0, 0%, 100%) 90%
+      );
+    }
+
+    &:hover,
+    &:focus {
+      background-color: color-mix(
+        in srgb,
+        var(--primary-color),
+        hsl(0, 0%, 100%) 85%
+      );
+    }
+  }
+</style>
+
+<script>
+  class AstroSidebar extends HTMLElement {
+    connectedCallback() {
+      const buttons = this.querySelectorAll(
+        '.component-button'
+      ) as NodeListOf<HTMLButtonElement>;
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const selectedComponent = button.dataset.componentName;
+
+          fetch(`/_astrolab/api/component`, {
+            method: 'POST',
+            body: JSON.stringify({
+              component: selectedComponent
+            })
+          }).then(() => {
+            window.location.reload(); // Refresh the page to pull new component data into dashboard
+          });
+        });
+      });
+    }
+  }
+
+  customElements.define('astro-sidebar', AstroSidebar);
+</script>

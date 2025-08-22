@@ -1,0 +1,28 @@
+input,
+select,
+textarea {
+  font-size: 1.6rem;
+  font-weight: 400;
+  display: block;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+}
+
+label {
+  font-size: 1.8rem;
+  font-weight: 300;
+  display: grid;
+  gap: 0.5rem;
+  width: max-content;
+}
+
+select {
+  background-image: url('../icons/chevron-down.svg');
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 1.8rem;
+  padding-right: 3rem;
+  appearance: none;
+}

@@ -1,0 +1,46 @@
+---
+import { getComponentData } from '../services/component-data';
+import Sidebar from './Sidebar.astro';
+import ComponentViewer from './ComponentViewer.astro';
+import ComponentSlots from './ComponentSlots.astro';
+import ComponentProps from './ComponentProps.astro';
+import ControlBar from './ControlBar.astro';
+import ControlPanel from './ControlPanel.astro';
+
+const component = await getComponentData(Astro);
+---
+
+<div class="dashboard">
+  <Sidebar {component} />
+  <div class="main">
+    {
+      component && (
+        <Fragment>
+          <ControlBar componentPath={component.component.path} />
+          <ComponentViewer {component} />
+          <ControlPanel>
+            <div slot="props">
+              <ComponentProps {component} />
+            </div>
+            <div slot="slots">
+              <ComponentSlots {component} />
+            </div>
+          </ControlPanel>
+        </Fragment>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .dashboard {
+    display: flex;
+    height: 100vh;
+  }
+
+  .main {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+</style>

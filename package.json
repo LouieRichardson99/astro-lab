@@ -1,0 +1,20 @@
+{
+  "name": "astrolab",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "author": "Louie Richardson",
+  "license": "MIT",
+  "description": "View your project's components in one place, letting you preview them and interactively adjust props and slots in real time",
+  "keywords": [
+    "astro-integration",
+    "devtools",
+    "tooling"
+  ],
+  "dependencies": {
+    "json5": "^2.2.3",
+    "ts-morph": "^26.0.0"
+  },
+  "devDependencies": {
+    "sass-embedded": "^1.90.0"
+  }
+}

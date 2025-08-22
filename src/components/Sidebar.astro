@@ -1,0 +1,188 @@
+---
+import getListOfComponents from '../lib/getListOfComponents';
+import type { ComponentData } from '../types';
+import CodeFolderIcon from '../icons/code-folder.svg';
+
+interface Props {
+  component: ComponentData | null;
+}
+
+const { component } = Astro.props;
+
+const components = await getListOfComponents();
+---
+
+<aside>
+  <astro-sidebar data-current-component={component?.component.name}>
+    <div class="sidebar">
+      <p class="title">Astrolab</p>
+      <div>
+        <p class="list-title">
+          <CodeFolderIcon />
+          Components
+        </p>
+        {
+          components.length > 0 ? (
+            <nav>
+              <ul class="component-list">
+                {components.map((comp) => (
+                  <li>
+                    <button
+                      class:list={[
+                        'component-button',
+                        { active: component?.component.name === comp.name }
+                      ]}
+                      data-component-name={comp.name}
+                    >
+                      {comp.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ) : (
+            <p class="empty-state">No components found</p>
+          )
+        }
+      </div>
+    </div>
+  </astro-sidebar>
+</aside>
+
+<style lang="scss">
+  .sidebar {
+    background-color: var(--sidebar-bg-color);
+    border-right: 1px solid var(--border-color);
+    position: relative;
+    color: var(--color);
+    width: 25rem;
+    height: 100vh;
+    padding: 1rem 1.25rem 2rem 1.25rem;
+    overflow-y: scroll;
+  }
+
+  .title {
+    font-size: 2rem;
+    font-weight: 300;
+    margin-bottom: 3rem;
+  }
+
+  .list-title {
+    font-weight: 300;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    svg {
+      width: 1.75rem;
+      height: 1.75rem;
+      color: var(--icon-color);
+    }
+  }
+
+  .component-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .empty-state {
+    font-size: 1.4rem;
+    font-weight: 300;
+    margin-top: 2rem;
+    color: var(--error-color);
+  }
+
+  .component-button {
+    font-weight: 300;
+    font-size: 1.6rem;
+    border-radius: 5px;
+    width: 100%;
+    border: none;
+    background: none;
+    padding: 0.25rem 1.25rem;
+    cursor: pointer;
+    transition: all var(--global-animation-speed) ease;
+    text-align: left;
+
+    &.active {
+      background-color: color-mix(
+        in srgb,
+        var(--primary-color),
+        hsl(0, 0%, 100%) 90%
+      );
+    }
+
+    &:hover,
+    &:focus {
+      background-color: color-mix(
+        in srgb,
+        var(--primary-color),
+        hsl(0, 0%, 100%) 85%
+      );
+    }
+  }
+</style>
+
+<style lang="scss" is:global>
+  .component-loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+
+    svg {
+      width: 4rem;
+      height: 4rem;
+      color: var(--icon-color);
+      animation: spin 1s linear infinite;
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    }
+  }
+</style>
+
+<script>
+  import LoadingSpinner from '../icons/loading.svg?raw';
+
+  class AstroSidebar extends HTMLElement {
+    connectedCallback() {
+      const main = document.querySelector('.main') as HTMLElement;
+      const buttons = this.querySelectorAll(
+        '.component-button'
+      ) as NodeListOf<HTMLButtonElement>;
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', async () => {
+          const selectedComponent = button.dataset.componentName;
+          const currentComponent = this.dataset.currentComponent;
+
+          if (currentComponent !== selectedComponent) {
+            main.innerHTML = `<div class="component-loading-state">${LoadingSpinner}</div>`;
+
+            await fetch('/_astrolab/api/component', {
+              method: 'POST',
+              body: JSON.stringify({
+                component: selectedComponent
+              })
+            });
+
+            window.location.reload(); // Refresh the page to show the new component (loads component into dashboard)
+          }
+        });
+      });
+    }
+  }
+
+  customElements.define('astro-sidebar', AstroSidebar);
+</script>

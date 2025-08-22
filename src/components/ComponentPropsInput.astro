@@ -1,0 +1,125 @@
+---
+import type { PropInfo } from '../types';
+import isPrimitiveUnion from '../utils/isPrimitiveUnion';
+
+export interface Props {
+  prop: PropInfo;
+  value: unknown;
+}
+
+const { prop, value } = Astro.props;
+const { type } = prop;
+---
+
+<component-props-input>
+  {
+    isPrimitiveUnion(type) && (
+      <fieldset>
+        <legend class="sr-only">Select {prop.name} value:</legend>
+        <div class="radio-group">
+          {type.types.map((t) => (
+            <label>
+              {t.name}
+              <input
+                type="radio"
+                name={prop.name}
+                value={t.name}
+                checked={value === t.name}
+              />
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    )
+  }
+
+  {
+    type.kind === 'primitive' && (
+      <Fragment>
+        {type.name === 'string' && (
+          <Fragment>
+            <label for={prop.name} class="sr-only">
+              {prop.name}
+            </label>
+            <input
+              type="text"
+              value={value as string}
+              name={prop.name}
+              id={prop.name}
+            />
+          </Fragment>
+        )}
+        {type.name === 'number' && (
+          <Fragment>
+            <label for={prop.name} class="sr-only">
+              {prop.name}
+            </label>
+            <input
+              type="number"
+              value={value as number}
+              name={prop.name}
+              id={prop.name}
+            />
+          </Fragment>
+        )}
+        {type.name === 'boolean' && (
+          <label class="toggle-switch">
+            <span class="sr-only">{prop.name}</span>
+            <input
+              type="checkbox"
+              class="toggle-switch__checkbox"
+              checked={Boolean(value)}
+              name={prop.name}
+              role="switch"
+            />
+            <span class="toggle-switch__slider" aria-hidden="true" />
+          </label>
+        )}
+      </Fragment>
+    )
+  }
+
+  {type.kind === 'unknown' && <span>Unknown type</span>}
+</component-props-input>
+
+<script>
+  class ComponentPropsInput extends HTMLElement {
+    connectedCallback() {
+      const inputs = this.querySelectorAll('input, select');
+
+      inputs.forEach((input) => {
+        input.addEventListener('change', (event: Event) => {
+          const target = event.target as HTMLInputElement | HTMLSelectElement;
+          const name = target.name;
+          let value: any;
+
+          if (target.type === 'checkbox') {
+            value = target.checked;
+          } else {
+            value = (
+              target as HTMLInputElement | HTMLSelectElement
+            ).value.trim();
+
+            try {
+              value = JSON.parse(value);
+            } catch {} // Keep string value
+          }
+
+          this.#updateComponent(name, value);
+        });
+      });
+    }
+
+    #updateComponent(name: string, value: any) {
+      fetch('/_astrolab/api/component', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prop: name, value })
+      }).then(() => {
+        document.dispatchEvent(new Event('component-updated'));
+      });
+    }
+  }
+
+  customElements.define('component-props-input', ComponentPropsInput);
+</script>

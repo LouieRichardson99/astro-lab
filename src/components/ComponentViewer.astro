@@ -1,0 +1,80 @@
+<component-viewer>
+  <div class="component-viewer">
+    <div class="component-wrapper"></div>
+  </div>
+</component-viewer>
+
+<style lang="scss">
+  .component-viewer {
+    width: 100%;
+    height: calc(100vh - var(--control-bar-height));
+    overflow: scroll;
+
+    &.grid {
+      background-size: 40px 40px;
+      background-image:
+        linear-gradient(to right, var(--border-color) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--border-color) 1px, transparent 1px);
+      background-position: -1px -1px;
+    }
+  }
+
+  .component-wrapper {
+    position: relative;
+    padding: 2.5rem;
+    transform-origin: left top;
+    transition: transform var(--global-animation-speed) ease-in-out;
+    z-index: 0;
+  }
+</style>
+
+<script>
+  class ComponentViewer extends HTMLElement {
+    componentViewer: HTMLElement | null = null;
+    componentWrapper: HTMLDivElement | null = null;
+    zoom: number = 1;
+
+    connectedCallback() {
+      this.componentViewer = this.querySelector('.component-viewer');
+      this.componentWrapper = this.querySelector('.component-wrapper');
+
+      this.#renderComponent();
+
+      document.addEventListener('component-updated', () =>
+        this.#renderComponent()
+      );
+
+      document.addEventListener('toggle-grid', () => {
+        this.componentViewer?.classList.toggle('grid');
+      });
+
+      document.addEventListener('zoom-in', () => {
+        this.zoom += 0.2;
+        this.#applyZoom();
+      });
+
+      document.addEventListener('zoom-out', () => {
+        this.zoom -= 0.2;
+        this.#applyZoom();
+      });
+
+      document.addEventListener('zoom-reset', () => {
+        this.zoom = 1;
+        this.#applyZoom();
+      });
+    }
+
+    async #renderComponent() {
+      const response = await fetch('/_astrolab/api/render-component');
+      const data = await response.text();
+
+      this.componentWrapper!.innerHTML = data;
+    }
+
+    #applyZoom() {
+      this.componentWrapper!.style.transform = `scale(${this.zoom})`;
+    }
+  }
+
+  customElements.define('component-viewer', ComponentViewer);
+</script>

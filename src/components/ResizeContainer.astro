@@ -1,0 +1,234 @@
+---
+interface Props {
+  name: string;
+  handles: ('left' | 'right' | 'top' | 'bottom')[];
+  width?: number;
+  height?: number;
+  minValues?: {
+    width?: number;
+    height?: number;
+  };
+  maxValues?: {
+    width?: number;
+    height?: number;
+  };
+}
+
+const { name, handles, width, height, minValues, maxValues } = Astro.props;
+---
+
+<resize-container
+  data-name={name}
+  data-handles={handles}
+  data-min-values={JSON.stringify(minValues)}
+  data-max-values={JSON.stringify(maxValues)}
+  style={`${width ? `width: ${width}px;` : ''} ${height ? `height: ${height}px;` : ''}`}
+>
+  <slot />
+  {
+    handles.map((handle) => (
+      <div
+        class={`resize-handle resize-handle--${handle}`}
+        aria-label={`Resize ${name}`}
+        tabindex="0"
+      />
+    ))
+  }
+</resize-container>
+
+<style lang="scss">
+  resize-container {
+    position: absolute;
+    display: block;
+  }
+
+  .resize-handle {
+    background-color: transparent;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    transition: background-color 0.2s ease;
+    touch-action: none;
+    z-index: 1;
+
+    &:hover,
+    &:focus {
+      background-color: color-mix(
+        in srgb,
+        var(--primary-color),
+        hsl(0, 0%, 100%) 70%
+      );
+
+      &.resizing {
+        background-color: color-mix(
+          in srgb,
+          var(--primary-color),
+          hsl(0, 0%, 100%) 60%
+        );
+      }
+    }
+
+    &--top {
+      top: 0;
+      left: 0;
+    }
+
+    &--right {
+      right: 0;
+      top: 0;
+    }
+
+    &--bottom {
+      bottom: 0;
+      left: 0;
+    }
+
+    &--left {
+      left: 0;
+      bottom: 0;
+    }
+
+    &--right,
+    &--left {
+      width: 0.6rem;
+      height: 100%;
+      transform: translateX(50%);
+      cursor: ew-resize;
+    }
+
+    &--top,
+    &--bottom {
+      width: 100%;
+      height: 0.6rem;
+      transform: translateY(50%);
+      cursor: ns-resize;
+    }
+  }
+</style>
+
+<script>
+  type ResizeHandle = 'left' | 'right' | 'top' | 'bottom';
+
+  class ResizeContainer extends HTMLElement {
+    name = this.dataset.name;
+    handles = this.dataset.handles?.split(',') as ResizeHandle[];
+    minValues = JSON.parse(this.dataset.minValues || '{}');
+    maxValues = JSON.parse(this.dataset.maxValues || '{}');
+
+    isResizing = false;
+    currentHandle = '';
+
+    startWidth = 0;
+    startHeight = 0;
+
+    startX = 0;
+    startY = 0;
+
+    startTop = 0;
+    startLeft = 0;
+
+    connectedCallback() {
+      this.handles?.forEach((handle) => {
+        const handleElement = this.querySelector(
+          `.resize-handle--${handle}`
+        ) as HTMLElement | null;
+
+        handleElement?.addEventListener('pointerdown', (event) =>
+          this.#startResize(event, handle)
+        );
+      });
+    }
+
+    #onPointerMove(event: PointerEvent) {
+      if (!this.isResizing) return;
+
+      const deltaX = event.clientX - this.startX;
+      const deltaY = event.clientY - this.startY;
+
+      const minW = this.minValues?.width ?? 0;
+      const minH = this.minValues?.height ?? 0;
+      const maxW = this.maxValues?.width ?? Infinity;
+      const maxH = this.maxValues?.height ?? Infinity;
+
+      if (this.currentHandle === 'top') {
+        // New height by moving top edge
+        let newHeight = this.startHeight - deltaY;
+        let newTop = this.startTop + deltaY;
+
+        if (newHeight > 0) {
+          this.style.height = newHeight + 'px';
+          this.style.top = newTop + 'px';
+        }
+      } else if (this.currentHandle === 'bottom') {
+        let newHeight = this.startHeight + deltaY;
+        newHeight = Math.max(minH, Math.min(maxH, newHeight));
+        if (newHeight > 0) this.style.height = newHeight + 'px';
+      } else if (this.currentHandle === 'left') {
+        let newWidth = this.startWidth - deltaX;
+        let newLeft = this.startLeft + deltaX;
+
+        if (newWidth < minW) {
+          newLeft += newWidth - minW;
+          newWidth = minW;
+        } else if (newWidth > maxW) {
+          newLeft += newWidth - maxW;
+          newWidth = maxW;
+        }
+
+        if (newWidth > 0) {
+          this.style.width = newWidth + 'px';
+          this.style.left = newLeft + 'px';
+        }
+      } else if (this.currentHandle === 'right') {
+        let newWidth = this.startWidth + deltaX;
+        newWidth = Math.max(minW, Math.min(maxW, newWidth));
+        if (newWidth > 0) this.style.width = newWidth + 'px';
+      }
+    }
+
+    #startResize(
+      event: PointerEvent,
+      handle: 'left' | 'right' | 'top' | 'bottom'
+    ) {
+      event.preventDefault();
+
+      this.isResizing = true;
+      this.currentHandle = handle;
+
+      this.startX = event.clientX;
+      this.startY = event.clientY;
+
+      const rect = this.getBoundingClientRect();
+      const parentRect = this.parentElement?.getBoundingClientRect();
+      this.startWidth = rect.width;
+      this.startHeight = rect.height;
+      // Absolute offsets relative to parent (fallback to viewport if no parent)
+      const baseTop = parentRect ? parentRect.top : 0;
+      const baseLeft = parentRect ? parentRect.left : 0;
+      this.startTop = rect.top - baseTop;
+      this.startLeft = rect.left - baseLeft;
+
+      document.body.style.userSelect = 'none';
+
+      window.addEventListener('pointermove', (event) =>
+        this.#onPointerMove(event)
+      );
+
+      window.addEventListener('pointerup', () => this.#stopResize());
+    }
+
+    #stopResize() {
+      this.isResizing = false;
+      this.currentHandle = '';
+
+      document.body.style.userSelect = '';
+
+      window.removeEventListener('pointermove', this.#onPointerMove);
+      window.removeEventListener('pointerup', this.#stopResize);
+
+      localStorage.setItem(`astrolab_${this.name}_width`, this.style.width);
+      localStorage.setItem(`astrolab_${this.name}_height`, this.style.height);
+    }
+  }
+
+  customElements.define('resize-container', ResizeContainer);
+</script>

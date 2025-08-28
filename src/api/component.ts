@@ -1,20 +1,20 @@
 export const prerender = false;
 
-import getListOfComponents from '../lib/getListOfComponents';
-import { readFileSync, rmSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import type { ComponentData } from '../types';
 import getComponentProperties from '../lib/getComponentProperties';
-import getComponentSlots from '../lib/getComponentSlots';
 import getComponentDefaults from '../lib/getComponentDefaults';
-
-const filePath = fileURLToPath(
-  new URL('../../data/component.json', import.meta.url)
-);
+import getListOfComponents from '../lib/getListOfComponents';
+import getComponentSlots from '../lib/getComponentSlots';
 
 export async function GET() {
   try {
-    const data = JSON.parse(readFileSync(filePath, 'utf-8'));
+    const componentDataFilePath = fileURLToPath(
+      new URL(`../../data/${getCurrentComponentId()}.json`, import.meta.url)
+    );
+    const data = JSON.parse(readFileSync(componentDataFilePath, 'utf-8'));
+
     return new Response(JSON.stringify(data), { status: 200 });
   } catch (error) {
     return new Response(null, { status: 204 });
@@ -23,7 +23,7 @@ export async function GET() {
 
 /**
  * Creates component JSON file.
- * Also removes component data file if component does not exist.
+ * Checks to see if component data file already exists before creating new one.
  * @param `component`
  * @returns `null`
  */
@@ -33,11 +33,16 @@ export async function POST({ request }: { request: Request }) {
   const component = components.find((comp) => comp.name === body.component);
 
   if (!component) {
-    rmSync(filePath);
+    return new Response(null, { status: 404 });
+  }
 
-    return new Response(null, {
-      status: 200
-    });
+  const existingComponentDataFilePath = fileURLToPath(
+    new URL(`../../data/${body.id}.json`, import.meta.url)
+  );
+
+  if (existsSync(existingComponentDataFilePath)) {
+    setCurrentComponentId(component.id);
+    return new Response(null, { status: 200 });
   }
 
   const componentContent = readFileSync(component?.path, 'utf-8');
@@ -59,14 +64,25 @@ export async function POST({ request }: { request: Request }) {
       slots: {}
     } as ComponentData;
 
-    writeFileSync(filePath, JSON.stringify(componentData, null, 2));
+    writeFileSync(
+      fileURLToPath(
+        new URL(`../../data/${component.id}.json`, import.meta.url)
+      ),
+      JSON.stringify(componentData, null, 2)
+    );
+
+    setCurrentComponentId(component.id);
+
+    return new Response(null, {
+      status: 201
+    });
   } catch (err) {
     console.error('Error writing component file:', err);
-  }
 
-  return new Response(null, {
-    status: 201
-  });
+    return new Response(null, {
+      status: 500
+    });
+  }
 }
 
 /**
@@ -77,7 +93,12 @@ export async function POST({ request }: { request: Request }) {
  * @returns `null`
  */
 export async function PUT({ request }: { request: Request }) {
-  const { prop, slot, value } = await request.json();
+  const { prop, slot, value, componentId } = await request.json();
+
+  const filePath = fileURLToPath(
+    new URL(`../../data/${componentId}.json`, import.meta.url)
+  );
+
   const data = JSON.parse(readFileSync(filePath, 'utf-8'));
 
   if (prop) {
@@ -93,14 +114,16 @@ export async function PUT({ request }: { request: Request }) {
   return new Response(null, { status: 204 });
 }
 
-/**
- * Deletes component JSON file.
- * @returns `null`
- */
-export async function DELETE() {
-  rmSync(filePath);
+const statePath = fileURLToPath(
+  new URL('../../data/state.json', import.meta.url)
+);
 
-  return new Response(null, {
-    status: 204
-  });
+function getCurrentComponentId() {
+  return existsSync(statePath)
+    ? JSON.parse(readFileSync(statePath, 'utf-8')).currentComponent
+    : null;
+}
+
+function setCurrentComponentId(id: string) {
+  writeFileSync(statePath, JSON.stringify({ currentComponent: id }, null, 2));
 }

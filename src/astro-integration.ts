@@ -2,30 +2,48 @@ import type { AstroIntegration } from 'astro';
 import path from 'path';
 import potionIcon from './icons/potion.svg?raw';
 
+export interface AstrolabOptions {
+  stylesheets?: string[];
+  scripts?: string[];
+  componentsDir?: string;
+}
+
 let origin: string | null = null;
 
-export default function (): AstroIntegration {
+export default function (options: AstrolabOptions): AstroIntegration {
+  const stylesheets = options.stylesheets ?? [];
+  const scripts = options.scripts ?? [];
+  const componentsDir = (options.componentsDir || 'src/components')
+    // Normalize componentsDir to a root-relative path without leading './'
+    .replace(/^\.\//, '')
+    .replace(/^\//, '');
+
   return {
     name: 'astrolab',
     hooks: {
-      'astro:config:setup': ({ injectRoute, addDevToolbarApp, command }) => {
+      'astro:config:setup': ({
+        injectRoute,
+        addDevToolbarApp,
+        command,
+        updateConfig
+      }) => {
         // Currently only supports development mode
         if (command !== 'dev') return;
 
         // Page Routes
         injectRoute({
           pattern: '/_astrolab',
-          entrypoint: 'astrolab/src/index.astro'
+          entrypoint: 'astrolab/src/pages/index.astro'
+        });
+        injectRoute({
+          pattern: '/_astrolab/preview',
+          entrypoint: 'astrolab/src/pages/preview.astro'
         });
 
         // API Routes
         injectRoute({
           pattern: '/_astrolab/api/component',
           entrypoint: 'astrolab/src/api/component.ts'
-        });
-        injectRoute({
-          pattern: '/_astrolab/api/render-component',
-          entrypoint: 'astrolab/src/api/render-component.ts'
         });
 
         // Dev Toolbar
@@ -35,23 +53,69 @@ export default function (): AstroIntegration {
           icon: potionIcon,
           entrypoint: new URL('./toolbar-app.ts', import.meta.url)
         });
+
+        updateConfig({
+          vite: {
+            plugins: [
+              {
+                name: 'astrolab-stylesheets-plugin',
+                resolveId(id: string) {
+                  if (id === 'virtual:astrolab-stylesheets') return id;
+                },
+                load(id: string) {
+                  if (id === 'virtual:astrolab-stylesheets') {
+                    return `export const stylesheets = ${JSON.stringify(
+                      stylesheets
+                    )};`;
+                  }
+                }
+              },
+              {
+                name: 'astrolab-scripts-plugin',
+                resolveId(id: string) {
+                  if (id === 'virtual:astrolab-scripts') return id;
+                },
+                load(id: string) {
+                  if (id === 'virtual:astrolab-scripts') {
+                    return `export const scripts = ${JSON.stringify(scripts)};`;
+                  }
+                }
+              },
+              {
+                name: 'astrolab-component-modules-plugin',
+                resolveId(id: string) {
+                  if (id === 'virtual:astrolab-component-modules') return id;
+                },
+                load(id: string) {
+                  if (id === 'virtual:astrolab-component-modules') {
+                    return `export const componentModules = import.meta.glob('/${componentsDir}/**/*.astro');`;
+                  }
+                }
+              }
+            ],
+            server: {
+              watch: {
+                ignored: ['**/astrolab/data/component-*.json']
+              }
+            }
+          }
+        });
       },
       'astro:server:setup': ({ server }) => {
-        const componentsDir = path.resolve(
+        const resolvedComponentsDir = path.resolve(
           server.config.root,
-          'src',
-          'components'
+          componentsDir
         );
 
         const isComponentFile = (file: string) =>
           file.endsWith('.astro') &&
-          (file === componentsDir || file.startsWith(componentsDir + path.sep));
+          (file === resolvedComponentsDir ||
+            file.startsWith(resolvedComponentsDir + path.sep));
 
         const invalidateIfComponent = (file: string) => {
           if (isComponentFile(file)) {
             if (!origin) return;
 
-            // Refresh component file when component is modified
             fetch(origin + '/_astrolab/api/component', {
               method: 'POST',
               body: JSON.stringify({
@@ -61,13 +125,13 @@ export default function (): AstroIntegration {
           }
         };
 
-        // Refresh component JSON file when component is modified
+        // Refresh component data file when component is modified
         server.watcher.on('add', invalidateIfComponent);
         server.watcher.on('change', invalidateIfComponent);
         server.watcher.on('unlink', invalidateIfComponent);
       },
       'astro:server:start': ({ address }) => {
-        origin = 'http://localhost:' + address.port; // TODO: Update to use actual origin
+        origin = 'http://localhost:' + address.port;
       }
     }
   };

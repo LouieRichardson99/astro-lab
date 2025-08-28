@@ -25,7 +25,11 @@ const { component } = Astro.props;
               <pre class="prop-name">{prop.name}</pre>
             </td>
             <td>
-              <ComponentPropsInput {prop} value={component.props[prop.name]} />
+              <ComponentPropsInput
+                {prop}
+                value={component.props[prop.name]}
+                componentId={component.id}
+              />
             </td>
           </tr>
         ))

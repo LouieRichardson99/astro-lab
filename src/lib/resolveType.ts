@@ -31,6 +31,17 @@ export default function resolveType(
       .filter((t) => !t.isUndefined())
       .map((t) => resolveType(t, typeChecker));
 
+    const isBooleanUnion = unionTypes.every(
+      (t) => t.kind === 'primitive' && typeof t.name === 'boolean'
+    );
+
+    if (isBooleanUnion) {
+      return {
+        kind: 'primitive',
+        name: 'boolean'
+      };
+    }
+
     // If type is a single element after removing 'undefined', return it directly
     if (unionTypes.length === 1) {
       const [firstElem] = unionTypes;

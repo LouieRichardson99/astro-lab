@@ -33,6 +33,7 @@ const components = await getListOfComponents();
                         { active: component?.component.name === comp.name }
                       ]}
                       data-component-name={comp.name}
+                      data-component-id={comp.id}
                     >
                       {comp.name}
                     </button>
@@ -165,6 +166,7 @@ const components = await getListOfComponents();
       buttons.forEach((button) => {
         button.addEventListener('click', async () => {
           const selectedComponent = button.dataset.componentName;
+          const selectedComponentId = button.dataset.componentId;
           const currentComponent = this.dataset.currentComponent;
 
           if (currentComponent !== selectedComponent) {
@@ -173,11 +175,10 @@ const components = await getListOfComponents();
             await fetch('/_astrolab/api/component', {
               method: 'POST',
               body: JSON.stringify({
-                component: selectedComponent
+                component: selectedComponent,
+                id: selectedComponentId
               })
             });
-
-            window.location.reload(); // Refresh the page to show the new component (loads component into dashboard)
           }
         });
       });

@@ -1,0 +1,52 @@
+---
+export const prerender = false;
+
+import { getComponentData } from '../services/component-data';
+import { stylesheets } from 'virtual:astrolab-stylesheets';
+import { scripts } from 'virtual:astrolab-scripts';
+import { componentModules } from 'virtual:astrolab-component-modules';
+
+const data = await getComponentData(Astro);
+
+const props = data?.props || {};
+const slots = Object.entries(data?.slots || {});
+
+const moduleLoader = Object.entries(componentModules).find(([p]) =>
+  p.endsWith(`/${data?.component.name}.astro`)
+)?.[1];
+
+const Component = moduleLoader ? (await moduleLoader()).default : null;
+
+if (!Component) {
+  throw new Error('Component not found');
+}
+---
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    astro-dev-toolbar {
+      display: none;
+    }
+  }
+</style>
+
+<html lang="en">
+  <head>
+    <title>Component Preview</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    {stylesheets.map((href) => <link rel="stylesheet" href={href} />)}
+  </head>
+  <body>
+    <Component {...props}>
+      {slots.map(([name, value]) => <Fragment name={name} set:html={value} />)}
+    </Component>
+
+    {scripts.map((src) => <script src={src} />)}
+  </body>
+</html>

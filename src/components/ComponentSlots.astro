@@ -8,11 +8,11 @@ interface Props {
 const { component } = Astro.props;
 ---
 
-<component-slots>
+<component-slots data-component-id={component.id}>
   <table class="component-slots">
     <thead>
       <tr>
-        <th>Slot</th>
+        <th class="slot-name-column">Slot</th>
         <th>Value</th>
       </tr>
     </thead>
@@ -20,8 +20,8 @@ const { component } = Astro.props;
       {
         component.component.slots.map((slot) => (
           <tr>
-            <td>
-              <pre>{slot.name}</pre>
+            <td class="slot-name-column">
+              <pre class="slot-name">{slot.name}</pre>
             </td>
             <td>
               <input
@@ -37,6 +37,17 @@ const { component } = Astro.props;
   </table>
 </component-slots>
 
+<style>
+  .slot-name-column {
+    min-width: max-content;
+    width: 20rem;
+  }
+
+  .slot-name {
+    font-size: 1.4rem;
+  }
+</style>
+
 <script>
   class ComponentSlots extends HTMLElement {
     connectedCallback() {
@@ -51,6 +62,7 @@ const { component } = Astro.props;
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              componentId: this.dataset.componentId,
               slot: name,
               value: value ? value : undefined
             })

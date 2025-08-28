@@ -1,6 +1,9 @@
 <component-viewer>
   <div class="component-viewer">
-    <div class="component-wrapper"></div>
+    <div class="component-wrapper">
+      <iframe sandbox="allow-scripts allow-same-origin" src="/_astrolab/preview"
+      ></iframe>
+    </div>
   </div>
 </component-viewer>
 
@@ -26,23 +29,29 @@
     transition: transform var(--global-animation-speed) ease-in-out;
     z-index: 0;
   }
+
+  iframe {
+    border: none;
+    width: 100%;
+    height: calc(100vh - var(--control-bar-height) - 5.5rem);
+  }
 </style>
 
 <script>
   class ComponentViewer extends HTMLElement {
     componentViewer: HTMLElement | null = null;
     componentWrapper: HTMLDivElement | null = null;
+    iframe: HTMLIFrameElement | null = null;
     zoom: number = 1;
 
     connectedCallback() {
       this.componentViewer = this.querySelector('.component-viewer');
       this.componentWrapper = this.querySelector('.component-wrapper');
+      this.iframe = this.querySelector('iframe');
 
-      this.#renderComponent();
-
-      document.addEventListener('component-updated', () =>
-        this.#renderComponent()
-      );
+      document.addEventListener('component-updated', () => {
+        this.iframe?.contentWindow?.location.reload();
+      });
 
       document.addEventListener('toggle-grid', () => {
         this.componentViewer?.classList.toggle('grid');
@@ -62,13 +71,6 @@
         this.zoom = 1;
         this.#applyZoom();
       });
-    }
-
-    async #renderComponent() {
-      const response = await fetch('/_astrolab/api/render-component');
-      const data = await response.text();
-
-      this.componentWrapper!.innerHTML = data;
     }
 
     #applyZoom() {

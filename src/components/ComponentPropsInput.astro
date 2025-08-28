@@ -5,13 +5,14 @@ import isPrimitiveUnion from '../utils/isPrimitiveUnion';
 export interface Props {
   prop: PropInfo;
   value: unknown;
+  componentId: string;
 }
 
-const { prop, value } = Astro.props;
+const { prop, value, componentId } = Astro.props;
 const { type } = prop;
 ---
 
-<component-props-input>
+<component-props-input data-component-id={componentId}>
   {
     isPrimitiveUnion(type) && (
       <fieldset>
@@ -114,7 +115,11 @@ const { type } = prop;
       fetch('/_astrolab/api/component', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prop: name, value })
+        body: JSON.stringify({
+          componentId: this.dataset.componentId,
+          prop: name,
+          value
+        })
       }).then(() => {
         document.dispatchEvent(new Event('component-updated'));
       });

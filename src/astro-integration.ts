@@ -95,7 +95,10 @@ export default function (options: AstrolabOptions): AstroIntegration {
             ],
             server: {
               watch: {
-                ignored: ['**/astrolab/data/component-*.json']
+                ignored: [
+                  '**/astrolab/data/component-*.json',
+                  '**/astrolab/data/state.json'
+                ]
               }
             }
           }

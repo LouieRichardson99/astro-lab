@@ -58,12 +58,12 @@
       });
 
       document.addEventListener('zoom-in', () => {
-        this.zoom += 0.2;
+        this.zoom += 0.1;
         this.#applyZoom();
       });
 
       document.addEventListener('zoom-out', () => {
-        this.zoom -= 0.2;
+        this.zoom -= 0.1;
         this.#applyZoom();
       });
 
@@ -74,7 +74,16 @@
     }
 
     #applyZoom() {
-      this.componentWrapper!.style.transform = `scale(${this.zoom})`;
+      const doc = this.iframe?.contentDocument;
+
+      if (doc) {
+        doc.documentElement.querySelector('body')!.style.transform =
+          `scale(${Math.max(0.2, this.zoom)})`;
+        doc.documentElement.querySelector('body')!.style.width =
+          `${100 / Math.max(0.2, this.zoom)}%`;
+        doc.documentElement.querySelector('body')!.style.height =
+          `${100 / Math.max(0.2, this.zoom)}%`;
+      }
     }
   }
 

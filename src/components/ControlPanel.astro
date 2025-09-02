@@ -31,7 +31,7 @@ const { hasProps, hasSlots } = Astro.props;
             id="slots-tab"
             class="tab"
             role="tab"
-            aria-selected="false"
+            aria-selected={hasProps ? 'false' : 'true'}
             aria-controls="slots"
           >
             Slots
@@ -63,7 +63,7 @@ const { hasProps, hasSlots } = Astro.props;
             class="tab-panel"
             role="tabpanel"
             aria-labelledby="slots-tab"
-            aria-hidden="true"
+            aria-hidden={hasProps ? 'true' : 'false'}
           >
             <slot name="slots" />
           </div>

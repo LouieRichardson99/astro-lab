@@ -5,6 +5,7 @@ import { getComponentData } from '../services/component-data';
 import { stylesheets } from 'virtual:astrolab-stylesheets';
 import { scripts } from 'virtual:astrolab-scripts';
 import { componentModules } from 'virtual:astrolab-component-modules';
+import ErrorHandler from '../components/ErrorHandler.astro';
 
 const data = await getComponentData(Astro);
 
@@ -22,6 +23,32 @@ if (!Component) {
 }
 ---
 
+<html lang="en">
+  <head>
+    <title>Component Preview</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    {stylesheets.map((href) => <link rel="stylesheet" href={href} />)}
+  </head>
+  <body>
+    <ErrorHandler>
+      <Component {...props}>
+        {
+          slots.map(([name, value]) => (
+            <Fragment name={name} set:html={value} />
+          ))
+        }
+      </Component>
+      <div slot="error">
+        {(error: Error) => <p class="error-message">{error.message}</p>}
+      </div>
+    </ErrorHandler>
+
+    {scripts.map((src) => <script src={src} />)}
+  </body>
+</html>
+
 <style>
   body {
     margin: 0;
@@ -32,21 +59,9 @@ if (!Component) {
       display: none;
     }
   }
+
+  .error-message {
+    color: hsl(0, 80%, 50%);
+    font-weight: 300;
+  }
 </style>
-
-<html lang="en">
-  <head>
-    <title>Component Preview</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    {stylesheets.map((href) => <link rel="stylesheet" href={href} />)}
-  </head>
-  <body>
-    <Component {...props}>
-      {slots.map(([name, value]) => <Fragment name={name} set:html={value} />)}
-    </Component>
-
-    {scripts.map((src) => <script src={src} />)}
-  </body>
-</html>

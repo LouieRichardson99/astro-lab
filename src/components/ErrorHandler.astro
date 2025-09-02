@@ -1,0 +1,16 @@
+---
+/**
+ * ErrorHandler is used to catch and display errors that occur during rendering.
+ * This prevents the entire application from crashing and allows for a nicer DX when handling errors.
+ */
+
+let html;
+
+try {
+  html = await Astro.slots.render('default');
+} catch (e) {
+  html = await Astro.slots.render('error', [e]);
+}
+---
+
+<Fragment set:html={html} />

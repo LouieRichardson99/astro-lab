@@ -1,17 +1,77 @@
 # Astrolab
 
-Astrolab is an Astro integration that brings an isolated UI development tool into your Astro environment. Astrolab brings all your repository components into one place where you can view and modify your props and slots on the fly.
+Astrolab is an Astro integration that brings an isolated UI development tool into your Astro environment. Astrolab brings all your repositories Astro components into one place where you can view and modify your props and slots on the fly.
+
+## ✨ Features
+
+- Zero-config: just add the integration and start your dev server
+- Automatic discovery of your Astro components
+- Live prop + slot playground per component
+- Hot reload of component metadata when you edit components
+- Optional global stylesheets & scripts injection for consistent preview styling
+
+## 📦 Installation
+
+Install as a dev dependency (recommended):
+
+```bash
+npm i -D astrolab
+# or
+pnpm add -D astrolab
+# or
+yarn add -D astrolab
+```
 
 ### Compatibility
 
-- ✅ Astro 5.x and up
-- ✅ SSG and SSR projects (Astrolab only runs in development so we won't interfere with your deployment approach)
+- Astro 5.x and up
+- SSG and SSR projects (Astrolab only runs in development so we won't interfere with your deployment approach)
 
-## Contributions
+## 🛠 Usage
 
-Contributions to Astrolab are always welcome and appreciated! Please feel free to open issues or Pull Requests for bugs and features 👷🏻‍♂️
+Register the integration in your `astro.config.mjs` (or `.ts`).
 
-## License
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import astrolab from 'astrolab';
+
+export default defineConfig({
+  integrations: [
+    astrolab({
+      // Optional
+      componentsDir: 'src/components',
+      stylesheets: ['/src/styles/global.css'],
+      scripts: ['/src/script.js']
+    })
+  ]
+});
+```
+
+Run your dev server:
+
+```bash
+npm run dev
+```
+
+Open the Astrolab UI either by:
+
+- Clicking the icon in the Astro Dev Toolbar, or
+- Visiting `/_astrolab` directly
+
+## ⚙️ Options
+
+| Option          | Type       | Default            | Description                                                                                                                            |
+| --------------- | ---------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `componentsDir` | `string`   | `'src/components'` | Root (relative to project) scanned for `.astro` component files.                                                                       |
+| `stylesheets`   | `string[]` | `[]`               | List of stylesheet paths or absolute `http(s)` URLs to inject into the preview document `<head>`. Useful for global and reset styling. |
+| `scripts`       | `string[]` | `[]`               | List of script paths or absolute URLs injected at the bottom of the `<body>` element in the preview document.                          |
+
+## 👷🏻‍♂️ Contributions
+
+Contributions to Astrolab are always welcome and appreciated! Please feel free to open issues or pull requests for bugs and features.
+
+## 📃 License
 
 Astrolab is licensed under the [MIT License](https://github.com/LouieRichardson99/astrolab/blob/main/LICENSE).
 

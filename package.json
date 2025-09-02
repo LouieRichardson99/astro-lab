@@ -4,7 +4,7 @@
   "main": "index.ts",
   "author": "Louie Richardson",
   "license": "MIT",
-  "description": "View your project's components in one place, letting you preview them and interactively adjust props and slots in real time",
+  "description": "View your Astro components in one place, letting you preview them and interactively adjust props and slots in real time",
   "keywords": [
     "astro-integration",
     "devtools",

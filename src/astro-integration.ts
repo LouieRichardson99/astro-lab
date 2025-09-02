@@ -11,9 +11,9 @@ export interface AstrolabOptions {
 let origin: string | null = null;
 
 export default function (options: AstrolabOptions): AstroIntegration {
-  const stylesheets = options.stylesheets ?? [];
-  const scripts = options.scripts ?? [];
-  const componentsDir = (options.componentsDir || 'src/components')
+  const stylesheets = (options?.stylesheets || []).map(normaliseResourcePath);
+  const scripts = (options?.scripts || []).map(normaliseResourcePath);
+  const componentsDir = (options?.componentsDir || 'src/components')
     // Normalize componentsDir to a root-relative path without leading './'
     .replace(/^\.\//, '')
     .replace(/^\//, '');
@@ -135,4 +135,16 @@ export default function (options: AstrolabOptions): AstroIntegration {
       }
     }
   };
+}
+
+function normaliseResourcePath(p: string) {
+  if (/^https?:\/\//.test(p)) return p; // leave absolute URLs
+
+  p = p.replace(/^\.\//, '');
+
+  if (!p.startsWith('/')) {
+    p = '/' + p;
+  }
+
+  return p;
 }

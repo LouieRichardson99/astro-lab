@@ -84,6 +84,8 @@ const { type } = prop;
 </component-props-input>
 
 <script>
+  import { updateComponentData } from '../services/component-data';
+
   class ComponentPropsInput extends HTMLElement {
     connectedCallback() {
       const inputs = this.querySelectorAll('input, select');
@@ -111,18 +113,15 @@ const { type } = prop;
       });
     }
 
-    #updateComponent(name: string, value: any) {
-      fetch('/_astrolab/api/component', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          componentId: this.dataset.componentId,
-          prop: name,
-          value
-        })
-      }).then(() => {
-        document.dispatchEvent(new Event('component-updated'));
-      });
+    async #updateComponent(name: string, value: any) {
+      await updateComponentData(
+        this.dataset.componentId || '',
+        'prop',
+        name,
+        value
+      );
+
+      document.dispatchEvent(new Event('component-updated'));
     }
   }
 

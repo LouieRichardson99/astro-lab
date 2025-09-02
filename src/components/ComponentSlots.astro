@@ -49,26 +49,25 @@ const { component } = Astro.props;
 </style>
 
 <script>
+  import { updateComponentData } from '../services/component-data';
+
   class ComponentSlots extends HTMLElement {
     connectedCallback() {
       const inputs = this.querySelectorAll('input');
 
       inputs.forEach((input) => {
-        input.addEventListener('change', (event: Event) => {
+        input.addEventListener('change', async (event: Event) => {
           let value = (event.target as HTMLInputElement).value.trim();
           const name = (event.target as HTMLInputElement).name;
 
-          fetch('/_astrolab/api/component', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              componentId: this.dataset.componentId,
-              slot: name,
-              value: value ? value : undefined
-            })
-          }).then(() => {
-            document.dispatchEvent(new Event('component-updated'));
-          });
+          await updateComponentData(
+            this.dataset.componentId || '',
+            'slot',
+            name,
+            value
+          );
+
+          document.dispatchEvent(new Event('component-updated'));
         });
       });
     }

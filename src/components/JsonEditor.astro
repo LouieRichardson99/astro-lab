@@ -1,0 +1,95 @@
+---
+import JSON5 from 'json5';
+
+interface Props {
+  componentId: string;
+  value: unknown;
+  type: 'array' | 'object';
+  name: string;
+}
+
+const { componentId, value, type, name } = Astro.props;
+---
+
+<json-editor
+  data-component-id={componentId}
+  data-type={type}
+  data-initial-value={JSON5.stringify(value)}
+>
+  <textarea name={name}>{JSON5.stringify(value, null, 2)}</textarea>
+</json-editor>
+
+<style lang="scss">
+  textarea {
+    field-sizing: content;
+    min-width: 30rem;
+    padding: 1.5rem;
+    resize: none;
+
+    &.error {
+      border: 1px solid var(--error-color);
+      outline-color: var(--error-color);
+    }
+  }
+</style>
+
+<script>
+  import JSON5 from 'json5';
+  import { updateComponentData } from '../services/component-data';
+
+  class JsonEditor extends HTMLElement {
+    value: unknown;
+
+    connectedCallback() {
+      const textarea = this.querySelector('textarea');
+      const type = this.dataset.type;
+      const initialValue = this.dataset.initialValue;
+
+      if (!textarea) return;
+
+      this.value = JSON5.parse(initialValue || '{}');
+
+      if (!initialValue) {
+        switch (type) {
+          case 'array':
+            this.value = [];
+            break;
+          case 'object':
+            this.value = {};
+            break;
+        }
+      }
+
+      const trailingCommaRegex = /\,(?=\s*?[\}\]])/g;
+
+      textarea.value = JSON5.stringify(this.value, null, 2).replace(
+        trailingCommaRegex,
+        ''
+      );
+
+      textarea.addEventListener('change', async (event) => {
+        try {
+          this.value = JSON5.parse((event.target as HTMLTextAreaElement).value);
+          textarea.value = JSON5.stringify(this.value, null, 2).replace(
+            trailingCommaRegex,
+            ''
+          );
+          textarea.classList.remove('error');
+
+          await updateComponentData(
+            this.dataset.componentId || '',
+            'prop',
+            textarea.name,
+            this.value
+          );
+
+          document.dispatchEvent(new Event('component-updated'));
+        } catch (error) {
+          textarea.classList.add('error');
+        }
+      });
+    }
+  }
+
+  customElements.define('json-editor', JsonEditor);
+</script>

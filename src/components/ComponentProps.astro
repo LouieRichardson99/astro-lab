@@ -24,7 +24,7 @@ const { component } = Astro.props;
             <td class="prop-name-column">
               <pre class="prop-name">{prop.name}</pre>
             </td>
-            <td>
+            <td class="prop-value-column">
               <ComponentPropsInput
                 {prop}
                 value={component.props[prop.name]}
@@ -41,7 +41,11 @@ const { component } = Astro.props;
 <style lang="scss">
   .prop-name-column {
     min-width: max-content;
-    width: 20rem;
+    min-width: 20rem;
+  }
+
+  .prop-value-column {
+    width: 100%;
   }
 
   .prop-name {

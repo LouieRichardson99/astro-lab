@@ -1,6 +1,7 @@
 ---
 import type { PropInfo } from '../types';
 import isPrimitiveUnion from '../utils/isPrimitiveUnion';
+import JsonEditor from './JsonEditor.astro';
 
 export interface Props {
   prop: PropInfo;
@@ -77,6 +78,17 @@ const { type } = prop;
           </label>
         )}
       </Fragment>
+    )
+  }
+
+  {
+    (type.kind === 'array' || type.kind === 'object') && (
+      <JsonEditor
+        componentId={componentId}
+        value={value}
+        type={type.kind}
+        name={prop.name}
+      />
     )
   }
 

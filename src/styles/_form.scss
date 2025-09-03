@@ -54,6 +54,8 @@ fieldset {
   border: none;
   margin: 0;
   padding: 0;
+  min-width: max-content;
+  width: 20rem;
 
   .radio-group {
     display: flex;

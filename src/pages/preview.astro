@@ -28,7 +28,6 @@ if (!Component) {
     <title>Component Preview</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     {stylesheets.map((href) => <link rel="stylesheet" href={href} />)}
   </head>
   <body>
@@ -54,6 +53,8 @@ if (!Component) {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    transform-origin: left top;
+    transition: transform 200ms ease;
 
     astro-dev-toolbar {
       display: none;

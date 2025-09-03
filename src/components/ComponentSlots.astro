@@ -23,7 +23,7 @@ const { component } = Astro.props;
             <td class="slot-name-column">
               <pre class="slot-name">{slot.name}</pre>
             </td>
-            <td>
+            <td class="slot-value-column">
               <input
                 type="text"
                 value={component.slots[slot.name]}
@@ -40,7 +40,11 @@ const { component } = Astro.props;
 <style>
   .slot-name-column {
     min-width: max-content;
-    width: 20rem;
+    min-width: 20rem;
+  }
+
+  .slot-value-column {
+    width: 100%;
   }
 
   .slot-name {

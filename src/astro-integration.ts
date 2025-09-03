@@ -11,7 +11,7 @@ export interface AstrolabOptions {
 
 let origin: string | null = null;
 
-export default function (options: AstrolabOptions): AstroIntegration {
+export default function (options?: AstrolabOptions): AstroIntegration {
   const stylesheets = (options?.stylesheets || []).map(normaliseResourcePath);
   const scripts = (options?.scripts || []).map(normaliseResourcePath);
   const componentsDir = (options?.componentsDir || 'src/components')

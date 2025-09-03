@@ -1,6 +1,7 @@
 import type { AstroIntegration } from 'astro';
 import path from 'path';
 import potionIcon from './icons/potion.svg?raw';
+import { mkdirSync } from 'fs';
 
 export interface AstrolabOptions {
   stylesheets?: string[];
@@ -105,6 +106,9 @@ export default function (options: AstrolabOptions): AstroIntegration {
         });
       },
       'astro:server:setup': ({ server }) => {
+        const __dirname = path.dirname(new URL(import.meta.url).pathname);
+        mkdirSync(path.resolve(__dirname, '../data'), { recursive: true }); // Create data on first run
+
         const resolvedComponentsDir = path.resolve(
           server.config.root,
           componentsDir

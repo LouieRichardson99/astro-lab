@@ -1,5 +1,5 @@
 import type { AstroIntegration } from 'astro';
-import path from 'path';
+import path from 'pathe';
 import potionIcon from './icons/potion.svg?raw';
 import { mkdirSync } from 'fs';
 

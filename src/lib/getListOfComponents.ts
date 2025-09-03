@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { readdirSync, readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
-import path from 'path';
+import path from 'pathe';
 import type { AstroInstance } from 'astro';
 import type { ComponentFileInfo } from '../types';
 import { componentModules } from 'virtual:astrolab-component-modules';

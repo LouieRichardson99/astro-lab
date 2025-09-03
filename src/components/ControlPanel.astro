@@ -1,5 +1,5 @@
 ---
-import XCircleIcon from '../icons/x-circle.svg';
+import XCircleIcon from '../icons/x-circle.svg?raw';
 
 interface Props {
   hasProps: boolean;
@@ -39,7 +39,7 @@ const { hasProps, hasSlots } = Astro.props;
         )
       }
       <button aria-label="Close control panel" class="close-button">
-        <XCircleIcon />
+        <Fragment set:html={XCircleIcon} />
       </button>
     </div>
     <div class="tabs-content">
@@ -159,7 +159,7 @@ const { hasProps, hasSlots } = Astro.props;
     padding: 0;
     cursor: pointer;
 
-    svg {
+    :global(svg) {
       color: var(--icon-color);
     }
   }

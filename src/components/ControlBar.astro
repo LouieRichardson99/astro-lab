@@ -1,9 +1,9 @@
 ---
-import BottomDrawerIcon from '../icons/bottom-drawer.svg';
-import HashIcon from '../icons/hash.svg';
-import ZoomInIcon from '../icons/zoom-in.svg';
-import ZoomOutIcon from '../icons/zoom-out.svg';
-import RefreshIcon from '../icons/refresh.svg';
+import BottomDrawerIcon from '../icons/bottom-drawer.svg?raw';
+import HashIcon from '../icons/hash.svg?raw';
+import ZoomInIcon from '../icons/zoom-in.svg?raw';
+import ZoomOutIcon from '../icons/zoom-out.svg?raw';
+import RefreshIcon from '../icons/refresh.svg?raw';
 
 interface Props {
   componentPath: string;
@@ -21,7 +21,7 @@ const { componentPath, hasControlPanel } = Astro.props;
         aria-label="Toggle component controls"
         data-action="toggle-controls"
       >
-        <BottomDrawerIcon />
+        <Fragment set:html={BottomDrawerIcon} />
       </button>
     )
   }
@@ -30,21 +30,21 @@ const { componentPath, hasControlPanel } = Astro.props;
     aria-label="Toggle grid"
     data-action="toggle-grid"
   >
-    <HashIcon />
+    <Fragment set:html={HashIcon} />
   </button>
   <span class="spacer"></span>
   <button class="control-button" aria-label="Zoom in" data-action="zoom-in">
-    <ZoomInIcon />
+    <Fragment set:html={ZoomInIcon} />
   </button>
   <button class="control-button" aria-label="Zoom out" data-action="zoom-out">
-    <ZoomOutIcon />
+    <Fragment set:html={ZoomOutIcon} />
   </button>
   <button
     class="control-button"
     aria-label="Reset zoom"
     data-action="zoom-reset"
   >
-    <RefreshIcon />
+    <Fragment set:html={RefreshIcon} />
   </button>
   {
     componentPath && (
@@ -73,7 +73,7 @@ const { componentPath, hasControlPanel } = Astro.props;
     padding: 0;
     cursor: pointer;
 
-    svg {
+    :global(svg) {
       height: 2.2rem;
       width: 2.2rem;
       color: var(--icon-color);

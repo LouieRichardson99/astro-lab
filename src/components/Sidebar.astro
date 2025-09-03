@@ -1,7 +1,7 @@
 ---
 import getListOfComponents from '../lib/getListOfComponents';
 import type { ComponentData } from '../types';
-import CodeFolderIcon from '../icons/code-folder.svg';
+import CodeFolderIcon from '../icons/code-folder.svg?raw';
 
 interface Props {
   component: ComponentData | null;
@@ -18,7 +18,7 @@ const components = await getListOfComponents();
       <p class="title">Astrolab</p>
       <div>
         <p class="list-title">
-          <CodeFolderIcon />
+          <Fragment set:html={CodeFolderIcon} />
           Components
         </p>
         {
@@ -76,7 +76,7 @@ const components = await getListOfComponents();
     align-items: center;
     gap: 0.75rem;
 
-    svg {
+    :global(svg) {
       width: 1.75rem;
       height: 1.75rem;
       color: var(--icon-color);

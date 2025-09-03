@@ -1,6 +1,6 @@
-# Astrolab
+# Astrolab UI
 
-Astrolab is an Astro integration that brings an isolated UI development tool into your Astro environment. Astrolab brings all your repositories Astro components into one place where you can view and modify your props and slots on the fly.
+Astrolab UI is an Astro integration that brings an isolated UI development tool into your Astro environment. Astrolab brings all your repositories Astro components into one place where you can view and modify your props and slots on the fly.
 
 ## ✨ Features
 
@@ -15,17 +15,17 @@ Astrolab is an Astro integration that brings an isolated UI development tool int
 Install as a dev dependency (recommended):
 
 ```bash
-npm i -D astrolab
+npm i -D astrolab-ui
 # or
-pnpm add -D astrolab
+pnpm add -D astrolab-ui
 # or
-yarn add -D astrolab
+yarn add -D astrolab-ui
 ```
 
 ### Compatibility
 
 - Astro 5.x and up
-- SSG and SSR projects (Astrolab only runs in development so we won't interfere with your deployment approach)
+- SSG and SSR projects (Astrolab UI only runs in development so we won't interfere with your deployment approach)
 
 ## 🛠 Usage
 
@@ -34,7 +34,7 @@ Register the integration in your `astro.config.mjs` (or `.ts`).
 ```js
 // astro.config.mjs
 import { defineConfig } from 'astro/config';
-import astrolab from 'astrolab';
+import astrolab from 'astrolab-ui';
 
 export default defineConfig({
   integrations: [
@@ -54,7 +54,7 @@ Run your dev server:
 npm run dev
 ```
 
-Open the Astrolab UI either by:
+Open Astrolab UI either by:
 
 - Clicking the icon in the Astro Dev Toolbar, or
 - Visiting `/_astrolab` directly
@@ -69,10 +69,10 @@ Open the Astrolab UI either by:
 
 ## 👷🏻‍♂️ Contributions
 
-Contributions to Astrolab are always welcome and appreciated! Please feel free to open issues or pull requests for bugs and features.
+Contributions to Astrolab UI are always welcome and appreciated! Please feel free to open issues or pull requests for bugs and features.
 
 ## 📃 License
 
-Astrolab is licensed under the [MIT License](https://github.com/LouieRichardson99/astrolab/blob/main/LICENSE).
+Astrolab UI is licensed under the [MIT License](https://github.com/LouieRichardson99/astrolab-ui/blob/main/LICENSE).
 
 Made by [Louie Richardson](https://louierichardson.com) 👨🏻‍🚀

@@ -33,17 +33,17 @@ export default function (options: AstrolabOptions): AstroIntegration {
         // Page Routes
         injectRoute({
           pattern: '/_astrolab',
-          entrypoint: 'astrolab/src/pages/index.astro'
+          entrypoint: 'astrolab-ui/src/pages/index.astro'
         });
         injectRoute({
           pattern: '/_astrolab/preview',
-          entrypoint: 'astrolab/src/pages/preview.astro'
+          entrypoint: 'astrolab-ui/src/pages/preview.astro'
         });
 
         // API Routes
         injectRoute({
           pattern: '/_astrolab/api/component',
-          entrypoint: 'astrolab/src/api/component.ts'
+          entrypoint: 'astrolab-ui/src/api/component.ts'
         });
 
         // Dev Toolbar

@@ -1,6 +1,6 @@
 {
   "name": "astrolab-ui",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "index.ts",
   "author": "Louie Richardson",
   "license": "MIT",
@@ -12,9 +12,7 @@
   ],
   "dependencies": {
     "json5": "^2.2.3",
+    "sass-embedded": "^1.92.0",
     "ts-morph": "^26.0.0"
-  },
-  "devDependencies": {
-    "sass-embedded": "^1.90.0"
   }
 }

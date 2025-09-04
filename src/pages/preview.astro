@@ -56,15 +56,15 @@ if (!Component) {
     box-sizing: border-box;
     transform-origin: left top;
     transition: transform 200ms ease;
-
-    astro-dev-toolbar {
-      display: none;
-    }
   }
 
   .error-message {
     font-family: 'system-ui', sans-serif;
     color: hsl(0, 80%, 50%);
     font-weight: 300;
+  }
+
+  :global(astro-dev-toolbar) {
+    display: none;
   }
 </style>

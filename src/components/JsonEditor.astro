@@ -43,11 +43,13 @@ const { componentId, value, type, name } = Astro.props;
     connectedCallback() {
       const textarea = this.querySelector('textarea');
       const type = this.dataset.type;
-      const initialValue = this.dataset.initialValue;
+      const initialValue = this.dataset.initialValue
+        ? JSON5.parse(this.dataset.initialValue)
+        : null;
 
       if (!textarea) return;
 
-      this.value = JSON5.parse(initialValue || '{}');
+      this.value = initialValue;
 
       if (!initialValue) {
         switch (type) {

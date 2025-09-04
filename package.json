@@ -1,6 +1,6 @@
 {
   "name": "astrolab-ui",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "index.ts",
   "author": "Louie Richardson",
   "license": "MIT",

@@ -24,30 +24,32 @@ if (!Component) {
 }
 ---
 
-<html lang="en">
-  <head>
-    <title>Component Preview</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {stylesheets.map((href) => <link rel="stylesheet" href={href} />)}
-  </head>
-  <body>
-    <ErrorHandler>
-      <Component {...props}>
-        {
-          slots.map(([name, value]) => (
-            <Fragment name={name} set:html={value} />
-          ))
-        }
-      </Component>
-      <div slot="error">
-        {(error: Error) => <p class="error-message">{error.message}</p>}
-      </div>
-    </ErrorHandler>
+<preview-doc>
+  <html lang="en">
+    <head>
+      <title>Component Preview</title>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      {stylesheets.map((href) => <link rel="stylesheet" href={href} />)}
+    </head>
+    <body>
+      <ErrorHandler>
+        <Component {...props}>
+          {
+            slots.map(([name, value]) => (
+              <Fragment name={name} set:html={value} />
+            ))
+          }
+        </Component>
+        <div slot="error">
+          {(error: Error) => <p class="error-message">{error.message}</p>}
+        </div>
+      </ErrorHandler>
 
-    {scripts.map((src) => <script src={src} />)}
-  </body>
-</html>
+      {scripts.map((src) => <script src={src} />)}
+    </body>
+  </html>
+</preview-doc>
 
 <style>
   body {
@@ -68,3 +70,16 @@ if (!Component) {
     display: none;
   }
 </style>
+
+<script>
+  class PreviewDoc extends HTMLElement {
+    connectedCallback() {
+      document.querySelectorAll('a[href]').forEach((link) => {
+        link.setAttribute('target', '_blank'); // Prevent navigation in the iframe
+        link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
+      });
+    }
+  }
+
+  customElements.define('preview-doc', PreviewDoc);
+</script>

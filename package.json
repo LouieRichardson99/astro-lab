@@ -11,6 +11,7 @@
     "tooling"
   ],
   "dependencies": {
+    "chalk": "^5.6.0",
     "json5": "^2.2.3",
     "pathe": "^2.0.3",
     "sass-embedded": "^1.92.0",

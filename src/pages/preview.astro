@@ -6,6 +6,7 @@ import { stylesheets } from 'virtual:astrolab-stylesheets';
 import { scripts } from 'virtual:astrolab-scripts';
 import { componentModules } from 'virtual:astrolab-component-modules';
 import ErrorHandler from '../components/ErrorHandler.astro';
+import prettyConsoleLog from '../utils/prettyConsoleLog';
 
 const data = await getComponentData(Astro);
 
@@ -19,7 +20,7 @@ const moduleLoader = Object.entries(componentModules).find(([p]) =>
 const Component = moduleLoader ? (await moduleLoader()).default : null;
 
 if (!Component) {
-  throw new Error('Component not found');
+  prettyConsoleLog(`Component not found: ${data?.component.name}`, 'error');
 }
 ---
 
@@ -62,6 +63,7 @@ if (!Component) {
   }
 
   .error-message {
+    font-family: 'system-ui', sans-serif;
     color: hsl(0, 80%, 50%);
     font-weight: 300;
   }

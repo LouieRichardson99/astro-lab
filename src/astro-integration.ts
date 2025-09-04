@@ -2,6 +2,7 @@ import type { AstroIntegration } from 'astro';
 import path from 'pathe';
 import potionIcon from './icons/potion.svg?raw';
 import { mkdirSync } from 'fs';
+import prettyConsoleLog from './utils/prettyConsoleLog';
 
 export interface AstrolabOptions {
   stylesheets?: string[];
@@ -25,6 +26,7 @@ export default function (options?: AstrolabOptions): AstroIntegration {
       'astro:config:setup': ({
         injectRoute,
         addDevToolbarApp,
+        addMiddleware,
         command,
         updateConfig
       }) => {
@@ -45,6 +47,12 @@ export default function (options?: AstrolabOptions): AstroIntegration {
         injectRoute({
           pattern: '/_astrolab/api/component',
           entrypoint: 'astrolab-ui/src/api/component.ts'
+        });
+
+        // Middleware
+        addMiddleware({
+          entrypoint: new URL('./middleware.ts', import.meta.url),
+          order: 'pre'
         });
 
         // Dev Toolbar
@@ -126,9 +134,12 @@ export default function (options?: AstrolabOptions): AstroIntegration {
             fetch(origin + '/_astrolab/api/component', {
               method: 'POST',
               body: JSON.stringify({
-                component: path.basename(file, '.astro')
+                component: path.basename(file, '.astro'),
+                id: null
               })
             }).catch(() => {});
+
+            prettyConsoleLog(`Refreshing component: ${path.basename(file)}`);
           }
         };
 
@@ -139,6 +150,8 @@ export default function (options?: AstrolabOptions): AstroIntegration {
       },
       'astro:server:start': ({ address }) => {
         origin = 'http://localhost:' + address.port;
+
+        prettyConsoleLog(`Astrolab available at ${origin}/_astrolab`);
       }
     }
   };

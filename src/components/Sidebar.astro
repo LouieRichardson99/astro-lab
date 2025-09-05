@@ -1,15 +1,13 @@
 ---
-import getListOfComponents from '../lib/getListOfComponents';
 import type { ComponentData } from '../types';
 import CodeFolderIcon from '../icons/code-folder.svg?raw';
+import { componentFiles } from 'virtual:astrolab-component-files';
 
 interface Props {
   component: ComponentData | null;
 }
 
 const { component } = Astro.props;
-
-const components = await getListOfComponents();
 ---
 
 <aside>
@@ -22,10 +20,10 @@ const components = await getListOfComponents();
           Components
         </p>
         {
-          components.length > 0 ? (
+          componentFiles.length > 0 ? (
             <nav>
               <ul class="component-list">
-                {components.map((comp) => (
+                {componentFiles.map((comp) => (
                   <li>
                     <button
                       class:list={[

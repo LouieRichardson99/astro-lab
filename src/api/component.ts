@@ -3,9 +3,9 @@ export const prerender = false;
 import { fileURLToPath } from 'url';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import type { ComponentData } from '../types';
+import { componentFiles } from 'virtual:astrolab-component-files';
 import getComponentProperties from '../lib/getComponentProperties';
 import getComponentDefaults from '../lib/getComponentDefaults';
-import getListOfComponents from '../lib/getListOfComponents';
 import getComponentSlots from '../lib/getComponentSlots';
 
 export async function GET() {
@@ -29,8 +29,7 @@ export async function GET() {
  */
 export async function POST({ request }: { request: Request }) {
   const body = await request.json();
-  const components = await getListOfComponents();
-  const component = components.find((comp) => comp.name === body.component);
+  const component = componentFiles.find((comp) => comp.name === body.component);
 
   if (!component) {
     return new Response(null, { status: 404 });

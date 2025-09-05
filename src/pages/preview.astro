@@ -4,66 +4,72 @@ export const prerender = false;
 import { getComponentData } from '../services/component-data';
 import { stylesheets } from 'virtual:astrolab-stylesheets';
 import { scripts } from 'virtual:astrolab-scripts';
-import { componentModules } from 'virtual:astrolab-component-modules';
 import ErrorHandler from '../components/ErrorHandler.astro';
 import prettyConsoleLog from '../utils/prettyConsoleLog';
+import { componentModules } from 'virtual:astrolab-component-modules';
 
 const data = await getComponentData(Astro);
 
 const props = data?.props || {};
 const slots = Object.entries(data?.slots || {});
 
-const moduleLoader = Object.entries(componentModules).find(([p]) =>
-  p.endsWith(`/${data?.component.name}.astro`)
-)?.[1];
-
-const Component = moduleLoader ? (await moduleLoader()).default : null;
+const Component = await componentModules[data?.component?.name || '']();
 
 if (!Component) {
-  prettyConsoleLog(`Component not found: ${data?.component.name}`, 'error');
+  prettyConsoleLog(`Component not found: ${data?.component?.name}`, 'error');
 }
 ---
 
-<preview-doc>
-  <html lang="en">
-    <head>
-      <title>Component Preview</title>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      {stylesheets.map((href) => <link rel="stylesheet" href={href} />)}
-    </head>
-    <body>
-      <ErrorHandler>
-        <Component {...props}>
-          {
-            slots.map(([name, value]) => (
-              <Fragment name={name} set:html={value} />
-            ))
-          }
-        </Component>
-        <div slot="error">
-          {(error: Error) => <p class="error-message">{error.message}</p>}
-        </div>
-      </ErrorHandler>
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Component Preview</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {stylesheets.map((href) => <link rel="stylesheet" href={href} />)}
+  </head>
+  <body>
+    <ErrorHandler>
+      <Component {...props}>
+        {
+          slots.map(([name, value]) => (
+            <Fragment name={name} set:html={value} />
+          ))
+        }
+      </Component>
+      <div slot="error">
+        {(error: Error) => <p class="error-message">{error.message}</p>}
+      </div>
+    </ErrorHandler>
 
-      {scripts.map((src) => <script src={src} />)}
-    </body>
-  </html>
-</preview-doc>
+    {scripts.map((src) => <script src={src} />)}
+  </body>
+</html>
 
-<style>
+<style lang="scss">
   body {
     margin: 0;
-    padding: 0;
+    padding: 20px;
     box-sizing: border-box;
     transform-origin: left top;
     transition: transform 200ms ease;
+    background-color: hsl(0, 0%, 100%);
+
+    &.grid-lines {
+      background-size: 40px 40px;
+      background-image:
+        linear-gradient(to right, hsl(0, 0%, 90%) 1px, transparent 1px),
+        linear-gradient(to bottom, hsl(0, 0%, 90%) 1px, transparent 1px);
+      background-position: -1px -1px;
+    }
   }
 
   .error-message {
     font-family: 'system-ui', sans-serif;
-    color: hsl(0, 80%, 50%);
+    font-size: 16px;
     font-weight: 300;
+    color: hsl(0, 80%, 50%);
+    margin: 0;
   }
 
   :global(astro-dev-toolbar) {
@@ -72,14 +78,8 @@ if (!Component) {
 </style>
 
 <script>
-  class PreviewDoc extends HTMLElement {
-    connectedCallback() {
-      document.querySelectorAll('a[href]').forEach((link) => {
-        link.setAttribute('target', '_blank'); // Prevent navigation in the iframe
-        link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
-      });
-    }
-  }
-
-  customElements.define('preview-doc', PreviewDoc);
+  document.querySelectorAll('a[href]').forEach((link) => {
+    link.setAttribute('target', '_blank'); // Prevent navigation in the iframe
+    link.setAttribute('rel', 'noopener noreferrer');
+  });
 </script>

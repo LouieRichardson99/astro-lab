@@ -1,6 +1,6 @@
 ---
 import type { ComponentData } from '../types';
-import CodeFolderIcon from '../icons/code-folder.svg?raw';
+import SettingsIcon from '../icons/settings.svg?raw';
 import { componentFiles } from 'virtual:astrolab-component-files';
 
 interface Props {
@@ -13,12 +13,14 @@ const { component } = Astro.props;
 <aside>
   <astro-sidebar data-current-component={component?.component.name}>
     <div class="sidebar">
-      <p class="title">Astrolab</p>
+      <div class="header">
+        <p class="title">Astrolab</p>
+        <button id="settings-button" class="icon-button" aria-label="Settings">
+          <Fragment set:html={SettingsIcon} />
+        </button>
+      </div>
       <div>
-        <p class="list-title">
-          <Fragment set:html={CodeFolderIcon} />
-          Components
-        </p>
+        <p class="list-title">Components</p>
         {
           componentFiles.length > 0 ? (
             <nav>
@@ -56,14 +58,16 @@ const { component } = Astro.props;
     color: var(--color);
     width: 25rem;
     height: 100vh;
-    padding: 1rem 1.25rem 2rem 1.25rem;
+    padding: 0 1.5rem 2rem 1.5rem;
     overflow-y: scroll;
   }
 
-  .title {
-    font-size: 2rem;
-    font-weight: 300;
-    margin-bottom: 3rem;
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 4.5rem;
+    margin-bottom: 2rem;
   }
 
   .list-title {
@@ -159,6 +163,13 @@ const { component } = Astro.props;
       const buttons = this.querySelectorAll(
         '.component-button'
       ) as NodeListOf<HTMLButtonElement>;
+      const settingsButton = this.querySelector(
+        '#settings-button'
+      ) as HTMLButtonElement;
+
+      settingsButton.addEventListener('click', () => {
+        document.dispatchEvent(new Event('open-settings-popup'));
+      });
 
       buttons.forEach((button) => {
         button.addEventListener('click', async () => {

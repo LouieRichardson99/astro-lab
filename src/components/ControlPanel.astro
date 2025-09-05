@@ -38,7 +38,7 @@ const { hasProps, hasSlots } = Astro.props;
           </button>
         )
       }
-      <button aria-label="Close control panel" class="close-button">
+      <button class="icon-button close-button" aria-label="Close control panel">
         <Fragment set:html={XCircleIcon} />
       </button>
     </div>
@@ -152,16 +152,7 @@ const { hasProps, hasSlots } = Astro.props;
   }
 
   .close-button {
-    background: none;
-    display: flex;
-    border: none;
     margin-left: auto;
-    padding: 0;
-    cursor: pointer;
-
-    :global(svg) {
-      color: var(--icon-color);
-    }
   }
 </style>
 
@@ -170,7 +161,7 @@ const { hasProps, hasSlots } = Astro.props;
     controlPanel = this.querySelector('.control-panel') as HTMLElement;
     tabsContainer = this.querySelector('.tabs-container') as HTMLElement;
     tabs = this.querySelectorAll('.tab') as NodeListOf<HTMLElement>;
-    closeButton = this.querySelector('.close-button') as HTMLElement;
+    closeButton = this.querySelector('.close-button') as HTMLButtonElement;
 
     connectedCallback() {
       this.tabs.forEach((tab) => {

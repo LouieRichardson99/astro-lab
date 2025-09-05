@@ -6,6 +6,7 @@ import ComponentSlots from './ComponentSlots.astro';
 import ComponentProps from './ComponentProps.astro';
 import ControlBar from './ControlBar.astro';
 import ControlPanel from './ControlPanel.astro';
+import SettingsPopup from './SettingsPopup.astro';
 
 const component = await getComponentData(Astro);
 
@@ -44,6 +45,7 @@ const componentHasSlots = component
       )
     }
   </div>
+  <SettingsPopup />
 </div>
 
 <style>

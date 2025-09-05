@@ -12,6 +12,7 @@
   --border-color: hsl(0, 0%, 90%);
   --icon-color: hsl(200, 20%, 35%);
   --color: hsl(0, 0%, 10%);
+  --color-text-secondary: hsl(0, 0%, 35%);
   --control-bar-height: 4.5rem;
   --global-animation-speed: 0.25s;
 }
@@ -67,4 +68,79 @@ table {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
+}
+
+.icon-button {
+  background: none;
+  display: flex;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  &:hover {
+    svg {
+      color: var(--primary-color);
+    }
+  }
+
+  svg {
+    height: 2.2rem;
+    width: 2.2rem;
+    color: var(--icon-color);
+    transition: 150ms color ease;
+  }
+}
+
+.button {
+  background-color: hsl(0, 0%, 90%);
+  font-size: 1.5rem;
+  font-weight: 300;
+  line-height: 1;
+  border-radius: 5px;
+  border: none;
+  padding: 1rem 1.75rem;
+  transition: background-color var(--global-animation-speed) ease;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    background-color: hsl(0, 0%, 85%);
+  }
+
+  &:disabled {
+    background-color: var(--light-grey);
+    cursor: not-allowed;
+
+    &:hover {
+      background-color: var(--light-grey);
+    }
+  }
+
+  &.primary {
+    background-color: var(--primary-color);
+    color: hsl(0, 0%, 100%);
+
+    &:hover,
+    &:focus {
+      background-color: color-mix(
+        in srgb,
+        var(--primary-color),
+        hsl(0, 0%, 0%) 10%
+      );
+    }
+  }
+
+  &.warning {
+    background-color: var(--error-color);
+    color: hsl(0, 0%, 100%);
+
+    &:hover,
+    &:focus {
+      background-color: color-mix(
+        in srgb,
+        var(--error-color),
+        hsl(0, 0%, 0%) 10%
+      );
+    }
+  }
 }

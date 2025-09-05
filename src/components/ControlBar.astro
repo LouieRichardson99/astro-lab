@@ -17,7 +17,7 @@ const { componentPath, hasControlPanel } = Astro.props;
   {
     hasControlPanel && (
       <button
-        class="control-button"
+        class="icon-button"
         aria-label="Toggle component controls"
         data-action="toggle-controls"
       >
@@ -26,24 +26,20 @@ const { componentPath, hasControlPanel } = Astro.props;
     )
   }
   <button
-    class="control-button"
+    class="icon-button"
     aria-label="Toggle grid"
     data-action="toggle-grid"
   >
     <Fragment set:html={HashIcon} />
   </button>
   <span class="spacer"></span>
-  <button class="control-button" aria-label="Zoom in" data-action="zoom-in">
+  <button class="icon-button" aria-label="Zoom in" data-action="zoom-in">
     <Fragment set:html={ZoomInIcon} />
   </button>
-  <button class="control-button" aria-label="Zoom out" data-action="zoom-out">
+  <button class="icon-button" aria-label="Zoom out" data-action="zoom-out">
     <Fragment set:html={ZoomOutIcon} />
   </button>
-  <button
-    class="control-button"
-    aria-label="Reset zoom"
-    data-action="zoom-reset"
-  >
+  <button class="icon-button" aria-label="Reset zoom" data-action="zoom-reset">
     <Fragment set:html={RefreshIcon} />
   </button>
   {
@@ -64,20 +60,6 @@ const { componentPath, hasControlPanel } = Astro.props;
     border-bottom: 1px solid var(--border-color);
     padding: 0 1.5rem;
     height: var(--control-bar-height);
-  }
-
-  .control-button {
-    background: none;
-    display: flex;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-
-    :global(svg) {
-      height: 2.2rem;
-      width: 2.2rem;
-      color: var(--icon-color);
-    }
   }
 
   .spacer {
@@ -104,15 +86,12 @@ const { componentPath, hasControlPanel } = Astro.props;
 </style>
 
 <script>
-  const controlButtons = document.querySelectorAll('.control-button');
+  const controlButtons = document.querySelectorAll('button[data-action]');
 
   controlButtons.forEach((button) => {
     button.addEventListener('click', () => {
       const action = button.getAttribute('data-action');
-
-      if (action) {
-        document.dispatchEvent(new CustomEvent(action));
-      }
+      document.dispatchEvent(new CustomEvent(action!));
     });
   });
 </script>

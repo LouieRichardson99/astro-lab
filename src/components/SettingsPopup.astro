@@ -1,0 +1,84 @@
+---
+import XCircleIcon from '../icons/x-circle.svg?raw';
+---
+
+<settings-popup>
+  <dialog class="settings-popup">
+    <div class="settings-popup-content">
+      <div class="header">
+        <h2 class="title">Settings</h2>
+        <button
+          class="icon-button close-button"
+          aria-label="Close settings popup"
+        >
+          <Fragment set:html={XCircleIcon} />
+        </button>
+      </div>
+      <p class="description">Clear the cached data to perform a full reload</p>
+      <button class="button warning" data-action="clear-cache">
+        Clear cache
+      </button>
+    </div>
+  </dialog>
+</settings-popup>
+
+<style lang="scss">
+  .settings-popup {
+    border: none;
+    border-radius: 5px;
+    max-width: 50rem;
+    width: 95%;
+
+    &::backdrop {
+      background: rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  .settings-popup-content {
+    padding: 1rem;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .description {
+    margin-bottom: 1rem;
+    color: var(--color-text-secondary);
+  }
+</style>
+
+<script>
+  class SettingsPopup extends HTMLElement {
+    connectedCallback() {
+      const dialog = this.querySelector('.settings-popup') as HTMLDialogElement;
+      const clearCacheButton = this.querySelector(
+        '[data-action="clear-cache"]'
+      ) as HTMLButtonElement;
+      const closeButton = this.querySelector(
+        '.close-button'
+      ) as HTMLButtonElement;
+
+      closeButton.addEventListener('click', () => {
+        dialog.close();
+      });
+
+      clearCacheButton.addEventListener('click', async () => {
+        await fetch('/_astrolab/api/cache', {
+          method: 'DELETE'
+        });
+
+        window.location.reload();
+      });
+
+      document.addEventListener('open-settings-popup', () => {
+        dialog.showModal();
+      });
+    }
+  }
+
+  customElements.define('settings-popup', SettingsPopup);
+</script>

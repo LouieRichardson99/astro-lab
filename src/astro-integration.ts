@@ -58,6 +58,10 @@ export default function (options?: AstrolabOptions): AstroIntegration {
           pattern: '/_astrolab/api/component',
           entrypoint: 'astrolab-ui/src/api/component.ts'
         });
+        injectRoute({
+          pattern: '/_astrolab/api/cache',
+          entrypoint: 'astrolab-ui/src/api/cache.ts'
+        });
 
         // Middleware
         addMiddleware({

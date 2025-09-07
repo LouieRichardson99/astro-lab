@@ -52,6 +52,8 @@ import XCircleIcon from '../icons/x-circle.svg?raw';
 </style>
 
 <script>
+  import { deleteCache } from '../services/cache';
+
   class SettingsPopup extends HTMLElement {
     connectedCallback() {
       const dialog = this.querySelector('.settings-popup') as HTMLDialogElement;
@@ -67,9 +69,7 @@ import XCircleIcon from '../icons/x-circle.svg?raw';
       });
 
       clearCacheButton.addEventListener('click', async () => {
-        await fetch('/_astrolab/api/cache', {
-          method: 'DELETE'
-        });
+        await deleteCache();
 
         window.location.reload();
       });

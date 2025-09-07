@@ -1,0 +1,128 @@
+---
+interface Props {
+  label: string;
+  dropdownButtonSvg?: string;
+  dropdownButtonText?: string;
+}
+
+const { label, dropdownButtonSvg, dropdownButtonText } = Astro.props;
+---
+
+<dropdown-element>
+  <div class="dropdown-wrapper">
+    <button
+      class:list={['dropdown-button', { 'icon-button': dropdownButtonSvg }]}
+      aria-label={label}
+      aria-expanded="false"
+    >
+      <Fragment set:html={dropdownButtonSvg} />
+      {dropdownButtonText}
+    </button>
+    <div class="dropdown-content" aria-hidden="true">
+      <slot />
+    </div>
+  </div>
+</dropdown-element>
+
+<style lang="scss">
+  .dropdown-wrapper {
+    position: relative;
+  }
+
+  .dropdown-content {
+    background-color: hsl(0, 0%, 100%);
+    display: none;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    z-index: 10;
+
+    &.open {
+      display: block;
+    }
+  }
+
+  .dropdown-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+  }
+</style>
+
+<script>
+  class DropdownElement extends HTMLElement {
+    connectedCallback() {
+      const dropdownButton = this.querySelector(
+        '.dropdown-button'
+      ) as HTMLButtonElement;
+      const dropdownContent = this.querySelector(
+        '.dropdown-content'
+      ) as HTMLElement;
+
+      if (!dropdownButton || !dropdownContent) return;
+
+      dropdownButton.addEventListener('click', () => {
+        const isExpanded =
+          dropdownButton.getAttribute('aria-expanded') === 'true';
+
+        if (isExpanded) {
+          this.#closeDropdown(dropdownButton, dropdownContent);
+        } else {
+          this.#openDropdown(dropdownButton, dropdownContent);
+        }
+      });
+
+      document.addEventListener('mousedown', (event) =>
+        this.#handleDocumentClick(event)
+      );
+
+      document.querySelectorAll('iframe').forEach((iframe) => {
+        try {
+          iframe.contentWindow?.addEventListener('mousedown', (event) =>
+            this.#handleDocumentClick(event)
+          );
+        } catch (e) {}
+      });
+    }
+
+    #openDropdown(button: HTMLButtonElement, content: HTMLElement) {
+      button.setAttribute('aria-expanded', 'true');
+      content.classList.add('open');
+      content.setAttribute('aria-hidden', 'false');
+    }
+
+    #closeDropdown(button: HTMLButtonElement, content: HTMLElement) {
+      button.setAttribute('aria-expanded', 'false');
+      content.classList.remove('open');
+      content.setAttribute('aria-hidden', 'true');
+      button.focus();
+    }
+
+    #handleDocumentClick(event: MouseEvent) {
+      const dropdownButton = this.querySelector(
+        '.dropdown-button'
+      ) as HTMLButtonElement;
+      const dropdownContent = this.querySelector(
+        '.dropdown-content'
+      ) as HTMLElement;
+
+      if (!dropdownButton || !dropdownContent) return;
+
+      const target = event.target as Node;
+      if (
+        !dropdownButton.contains(target) &&
+        !dropdownContent.contains(target) &&
+        dropdownButton.getAttribute('aria-expanded') === 'true'
+      ) {
+        this.#closeDropdown(dropdownButton, dropdownContent);
+      }
+    }
+  }
+
+  customElements.define('dropdown-element', DropdownElement);
+</script>

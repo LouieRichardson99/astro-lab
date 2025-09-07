@@ -4,6 +4,8 @@ import HashIcon from '../icons/hash.svg?raw';
 import ZoomInIcon from '../icons/zoom-in.svg?raw';
 import ZoomOutIcon from '../icons/zoom-out.svg?raw';
 import RefreshIcon from '../icons/refresh.svg?raw';
+import ScaleIcon from '../icons/scale.svg?raw';
+import Dropdown from './Dropdown.astro';
 
 interface Props {
   componentPath: string;
@@ -42,6 +44,15 @@ const { componentPath, hasControlPanel } = Astro.props;
   <button class="icon-button" aria-label="Reset zoom" data-action="zoom-reset">
     <Fragment set:html={RefreshIcon} />
   </button>
+  <span class="spacer"></span>
+  <Dropdown dropdownButtonSvg={ScaleIcon} label="Toggle device options">
+    <Fragment>
+      <button class="device-button" data-device="mobile">Mobile</button>
+      <button class="device-button" data-device="tablet">Tablet</button>
+      <button class="device-button" data-device="desktop">Desktop</button>
+      <button class="device-button" data-device="auto">Auto</button>
+    </Fragment>
+  </Dropdown>
   {
     componentPath && (
       <a href={`vscode://file/${componentPath}`} class="file-path-link">
@@ -66,6 +77,24 @@ const { componentPath, hasControlPanel } = Astro.props;
     width: 1rem;
   }
 
+  .device-button {
+    background: none;
+    border: none;
+    color: var(--color);
+    padding: 0.5rem 2rem 0.5rem 1rem;
+    font-size: 1.2rem;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+    overflow: hidden;
+    transition: background-color var(--global-animation-speed) ease;
+
+    &:hover,
+    &:focus {
+      background-color: hsl(0, 0%, 95%);
+    }
+  }
+
   .file-path-link {
     color: color-mix(in srgb, var(--color), hsl(0, 0%, 80%));
     text-decoration: none;
@@ -87,6 +116,34 @@ const { componentPath, hasControlPanel } = Astro.props;
 
 <script>
   const controlButtons = document.querySelectorAll('button[data-action]');
+  const deviceButtons = document.querySelectorAll('.device-button');
+  const componentViewer = document.querySelector(
+    '.component-viewer'
+  ) as HTMLElement;
+
+  deviceButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const device = button.getAttribute('data-device');
+      const dropdown = button.closest('.dropdown-content');
+      const dropdownButton =
+        dropdown?.previousElementSibling as HTMLButtonElement;
+
+      dropdown?.classList.remove('open');
+      dropdown?.setAttribute('aria-hidden', 'true');
+      dropdownButton?.setAttribute('aria-expanded', 'false');
+      dropdownButton?.focus();
+
+      componentViewer.style.backgroundColor = 'hsl(0, 0%, 90%)';
+
+      document
+        .querySelector('iframe')
+        ?.classList.remove('mobile', 'tablet', 'desktop');
+
+      if (device !== 'auto') {
+        document.querySelector('iframe')?.classList.add(device!);
+      }
+    });
+  });
 
   controlButtons.forEach((button) => {
     button.addEventListener('click', () => {

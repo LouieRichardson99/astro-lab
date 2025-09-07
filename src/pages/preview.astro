@@ -48,12 +48,16 @@ if (!Component) {
 
 <style lang="scss">
   body {
+    background-color: hsl(0, 0%, 100%);
     margin: 0;
     padding: 15px;
-    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    transform: scale(none);
     transform-origin: left top;
+    box-sizing: border-box;
     transition: transform 200ms ease;
-    background-color: hsl(0, 0%, 100%);
 
     &.grid-lines {
       background-size: 40px 40px;

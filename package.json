@@ -6,8 +6,8 @@
   "license": "MIT",
   "description": "View your Astro components in one place, letting you preview them and interactively adjust props and slots in real time",
   "keywords": [
+    "astro-integration",
     "astro-component",
-    "withastro",
     "devtools",
     "tooling"
   ],

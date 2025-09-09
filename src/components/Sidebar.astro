@@ -11,7 +11,7 @@ const { component } = Astro.props;
 ---
 
 <aside>
-  <astro-sidebar data-current-component={component?.component.name}>
+  <astro-sidebar data-current-component={component?.name}>
     <div class="sidebar">
       <div class="header">
         <p class="title">Astrolab</p>
@@ -30,7 +30,7 @@ const { component } = Astro.props;
                     <button
                       class:list={[
                         'component-button',
-                        { active: component?.component.name === comp.name }
+                        { active: component?.name === comp.name }
                       ]}
                       data-component-name={comp.name}
                       data-component-id={comp.id}

@@ -1,6 +1,5 @@
 import { Type, type TypeChecker } from 'ts-morph';
 import type { PropInfo, ResolvedType } from '../types';
-import JSON5 from 'json5';
 import symbolToProp from './symbolToProp';
 
 /**
@@ -18,7 +17,7 @@ export default function resolveType(
     type.isNumberLiteral() ||
     type.isBooleanLiteral()
   ) {
-    return { kind: 'primitive', name: JSON5.parse(type.getText()) };
+    return { kind: 'primitive', name: JSON.parse(type.getText()) };
   }
 
   if (type.isString() || type.isNumber() || type.isBoolean()) {

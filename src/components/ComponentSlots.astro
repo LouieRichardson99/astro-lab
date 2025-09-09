@@ -18,7 +18,7 @@ const { component } = Astro.props;
     </thead>
     <tbody>
       {
-        component.component.slots.map((slot) => (
+        component.schema.slots.map((slot) => (
           <tr>
             <td class="slot-name-column">
               <pre class="slot-name">{slot.name}</pre>
@@ -26,7 +26,7 @@ const { component } = Astro.props;
             <td class="slot-value-column">
               <input
                 type="text"
-                value={component.slots[slot.name]}
+                value={component.content.slots[slot.name]}
                 name={slot.name}
               />
             </td>
@@ -53,7 +53,7 @@ const { component } = Astro.props;
 </style>
 
 <script>
-  import { updateComponentData } from '../services/component-data';
+  import { updateComponentContent } from '../services/component-content';
 
   class ComponentSlots extends HTMLElement {
     connectedCallback() {
@@ -64,7 +64,7 @@ const { component } = Astro.props;
           let value = (event.target as HTMLInputElement).value.trim();
           const name = (event.target as HTMLInputElement).name;
 
-          await updateComponentData(
+          await updateComponentContent(
             this.dataset.componentId || '',
             'slot',
             name,

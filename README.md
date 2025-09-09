@@ -59,6 +59,42 @@ Open Astrolab UI either by:
 - Clicking the icon in the Astro Dev Toolbar, or
 - Visiting `/_astrolab` directly
 
+### Supplying JSON Data (Labs)
+
+You can prefill and keep your component playground data in simple JSON "lab" files.
+
+Where to put lab files
+
+- Create files under `src/labs` in your Astro project.
+- One file per component, named exactly after the component file name.
+  - Example: `src/components/Button.astro` → `src/labs/Button.json`.
+
+**Schema**
+
+- A lab file supports two top-level keys:
+  - `props`: JSON object of prop values to pass to the component.
+  - `slots`: JSON object of slot contents. Keys are slot names; values should be strings (HTML allowed). Use `"default"` for the default slot.
+
+**Example**
+
+```json
+{
+  "props": {
+    "variant": "primary",
+    "disabled": false,
+    "label": "Click me"
+  },
+  "slots": {
+    "default": "<strong>Click me</strong>"
+  }
+}
+```
+
+**Notes**
+
+- `props` values must be valid JSON. Complex objects/arrays are supported.
+- `slots` values are rendered as HTML.
+
 ## ⚙️ Options
 
 | Option          | Type       | Default            | Description                                                                                                                            |

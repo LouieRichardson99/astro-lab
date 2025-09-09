@@ -96,7 +96,7 @@ const { type } = prop;
 </component-props-input>
 
 <script>
-  import { updateComponentData } from '../services/component-data';
+  import { updateComponentContent } from '../services/component-content';
 
   class ComponentPropsInput extends HTMLElement {
     connectedCallback() {
@@ -126,7 +126,7 @@ const { type } = prop;
     }
 
     async #updateComponent(name: string, value: any) {
-      await updateComponentData(
+      await updateComponentContent(
         this.dataset.componentId || '',
         'prop',
         name,

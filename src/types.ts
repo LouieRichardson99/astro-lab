@@ -6,15 +6,16 @@ export interface PropInfo {
 
 export interface ComponentData {
   id: string;
-  component: {
-    name: string;
-    path: string;
+  name: string;
+  path: string;
+  schema: {
     props: PropInfo[];
     slots: { name: string }[];
-    defaults: Record<string, any>;
   };
-  props: Record<string, any>;
-  slots: Record<string, any>;
+  content: {
+    props: Record<string, any>;
+    slots: Record<string, any>;
+  };
 }
 
 export interface ComponentFileInfo {
@@ -37,3 +38,7 @@ export type ResolvedType =
       }[];
     }
   | { kind: 'unknown' };
+
+export interface AppState {
+  currentComponentId: string | null;
+}

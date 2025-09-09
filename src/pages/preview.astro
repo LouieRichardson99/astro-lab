@@ -8,15 +8,15 @@ import ErrorHandler from '../components/ErrorHandler.astro';
 import prettyConsoleLog from '../utils/prettyConsoleLog';
 import { componentModules } from 'virtual:astrolab-component-modules';
 
-const data = await getComponentData(Astro);
+const componentData = await getComponentData(Astro);
 
-const props = data?.props || {};
-const slots = Object.entries(data?.slots || {});
+let props = componentData?.content?.props || {};
+let slots = Object.entries(componentData?.content?.slots || {});
 
-const Component = await componentModules[data?.component?.name || '']();
+const Component = await componentModules[componentData?.name || '']();
 
 if (!Component) {
-  prettyConsoleLog(`Component not found: ${data?.component?.name}`, 'error');
+  prettyConsoleLog(`Component not found: ${componentData?.name}`, 'error');
 }
 ---
 

@@ -1,18 +1,20 @@
 import type { AstroIntegration } from 'astro';
 import pathe from 'pathe';
 import potionIcon from './icons/potion.svg?raw';
-import {
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  existsSync,
-  writeFileSync
-} from 'fs';
+import { mkdirSync, writeFileSync, readFileSync } from 'fs';
+import { createHash } from 'crypto';
 import prettyConsoleLog from './utils/prettyConsoleLog';
-import fg from 'fast-glob';
-import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import type { ViteDevServer } from 'vite';
+import astrolabScriptsPlugin from './plugins/vite/astrolab-scripts-plugin';
+import astrolabStylesheetsPlugin from './plugins/vite/astrolab-stylesheets-plugin';
+import astrolabComponentModulesPlugin from './plugins/vite/astrolab-component-modules';
+import astrolabComponentFilesPlugin from './plugins/vite/astrolab-component-files-plugin';
+import getComponentProperties from './lib/getComponentProperties';
+import getComponentSlots from './lib/getComponentSlots';
+import getComponentDefaults from './lib/getComponentDefaults';
+import getExistingComponentId from './utils/getExistingComponentId';
+import deleteCurrentComponentId from './utils/deleteCurrentComponentId';
 
 export interface AstrolabOptions {
   stylesheets?: string[];
@@ -21,6 +23,7 @@ export interface AstrolabOptions {
 }
 
 let origin: string | null = null;
+const __dirname = pathe.dirname(new URL(import.meta.url).pathname);
 
 export default function (options?: AstrolabOptions): AstroIntegration {
   const stylesheets = (options?.stylesheets || []).map(normaliseResourcePath);
@@ -56,7 +59,15 @@ export default function (options?: AstrolabOptions): AstroIntegration {
         // API Routes
         injectRoute({
           pattern: '/_astrolab/api/component',
-          entrypoint: 'astrolab-ui/src/api/component.ts'
+          entrypoint: 'astrolab-ui/src/api/component/index.ts'
+        });
+        injectRoute({
+          pattern: '/_astrolab/api/component/content',
+          entrypoint: 'astrolab-ui/src/api/component/content.ts'
+        });
+        injectRoute({
+          pattern: '/_astrolab/api/component/schema',
+          entrypoint: 'astrolab-ui/src/api/component/schema.ts'
         });
         injectRoute({
           pattern: '/_astrolab/api/cache',
@@ -84,110 +95,10 @@ export default function (options?: AstrolabOptions): AstroIntegration {
         updateConfig({
           vite: {
             plugins: [
-              {
-                name: 'astrolab-stylesheets-plugin',
-                resolveId(id: string) {
-                  if (id === 'virtual:astrolab-stylesheets') return id;
-                },
-                load(id: string) {
-                  if (id === 'virtual:astrolab-stylesheets') {
-                    return `export const stylesheets = ${JSON.stringify(
-                      stylesheets
-                    )};`;
-                  }
-                }
-              },
-              {
-                name: 'astrolab-scripts-plugin',
-                resolveId(id: string) {
-                  if (id === 'virtual:astrolab-scripts') return id;
-                },
-                load(id: string) {
-                  if (id === 'virtual:astrolab-scripts') {
-                    return `export const scripts = ${JSON.stringify(scripts)};`;
-                  }
-                }
-              },
-              {
-                name: 'astrolab-component-files-plugin',
-                resolveId(id: string) {
-                  if (id === 'virtual:astrolab-component-files') return id;
-                },
-                async load(id: string) {
-                  if (id === 'virtual:astrolab-component-files') {
-                    const files = await fg(
-                      pathe.relative(process.cwd(), componentsDir) +
-                        '/**/*.astro'
-                    );
-
-                    const existingIdByPath: Record<string, string> = {};
-                    const dataDir = fileURLToPath(
-                      new URL('../data', import.meta.url)
-                    );
-
-                    if (existsSync(dataDir)) {
-                      const dataFiles = readdirSync(dataDir).filter(
-                        (f) => f.startsWith('component-') && f.endsWith('.json')
-                      );
-
-                      for (const df of dataFiles) {
-                        try {
-                          const json = JSON.parse(
-                            readFileSync(pathe.join(dataDir, df), 'utf-8')
-                          );
-
-                          if (json?.component?.path && json?.id) {
-                            existingIdByPath[json.component.path] = json.id;
-                          }
-                        } catch {}
-                      }
-                    }
-
-                    const components = files.map((file) => {
-                      const abs = pathe.resolve(file);
-                      const existingId = existingIdByPath[abs];
-                      const id =
-                        existingId ||
-                        `component-${crypto.randomBytes(8).toString('hex')}`;
-
-                      return {
-                        id,
-                        name: pathe.basename(file, '.astro'),
-                        path: abs
-                      };
-                    });
-
-                    return `
-                      export const componentFiles = ${JSON.stringify(
-                        components
-                      )};
-                    `;
-                  }
-                }
-              },
-              {
-                name: 'astrolab-component-modules-plugin',
-                resolveId(id: string) {
-                  if (id === 'virtual:astrolab-component-modules') return id;
-                },
-                async load(id: string) {
-                  if (id === 'virtual:astrolab-component-modules') {
-                    const files = await fg(`${componentsDir}/**/*.astro`);
-
-                    const entries = files
-                      .map((file) => {
-                        const name = pathe.basename(file, '.astro');
-                        const importPath = file.startsWith('/')
-                          ? file
-                          : '/' + file;
-                        return `\n  '${name}': async () => (await import('${importPath}')).default`;
-                      })
-                      .join(',');
-
-                    return `export const componentModules = {${entries}\n};`;
-                  }
-                }
-              }
+              astrolabComponentModulesPlugin(componentsDir),
+              astrolabComponentFilesPlugin(componentsDir),
+              astrolabStylesheetsPlugin(stylesheets),
+              astrolabScriptsPlugin(scripts)
             ],
             server: {
               watch: {
@@ -201,7 +112,6 @@ export default function (options?: AstrolabOptions): AstroIntegration {
         });
       },
       'astro:server:setup': ({ server }) => {
-        const __dirname = pathe.dirname(new URL(import.meta.url).pathname);
         mkdirSync(pathe.resolve(__dirname, '../data'), { recursive: true }); // Create data directory on first run
 
         const resolvedComponentsDir = pathe.resolve(
@@ -209,38 +119,121 @@ export default function (options?: AstrolabOptions): AstroIntegration {
           componentsDir
         );
 
+        const resolvedLabsDir = pathe.resolve(server.config.root, 'src/labs');
+
+        const frontmatterHashByPath = new Map<string, string>();
+
         const isComponentFile = (file: string) =>
           file.endsWith('.astro') &&
           (file === resolvedComponentsDir ||
             file.startsWith(resolvedComponentsDir + pathe.sep));
 
-        function invalidateIfComponent(
-          file: string,
+        const isLabFile = (file: string) =>
+          file.endsWith('.json') &&
+          (file === resolvedLabsDir ||
+            file.startsWith(resolvedLabsDir + pathe.sep));
+
+        async function invalidateIfComponent(
+          path: string,
           event: 'add' | 'change' | 'unlink'
         ) {
-          if (!isComponentFile(file)) return;
+          if (!isComponentFile(path)) return;
 
-          invalidateVirtualModules(
-            [
-              'virtual:astrolab-component-files',
-              'virtual:astrolab-component-modules'
-            ],
-            server
-          );
+          let shouldReload = false;
+          try {
+            if (event === 'add' || event === 'change') {
+              const src = readFileSync(path, 'utf-8');
+              const newHash = getFrontmatterHash(src);
+              const prevHash = frontmatterHashByPath.get(path);
+              const frontmatterChanged =
+                prevHash === undefined || prevHash !== newHash;
 
-          if (event === 'unlink') {
-            clearCurrentComponentState(); // If a component file was deleted, clear the current selection so stale state isn't referenced.
+              frontmatterHashByPath.set(path, newHash);
+
+              if (frontmatterChanged) {
+                shouldReload = true;
+
+                // Compute latest schema and defaults from the Astro frontmatter
+                const props = getComponentProperties(src);
+                const slots = getComponentSlots(src);
+                const defaults = getComponentDefaults(src);
+
+                const existingId = getExistingComponentId(undefined, path);
+
+                if (existingId) {
+                  // Load, merge, and persist the updated schema/content
+                  const dataDir = pathe.resolve(__dirname, '../data');
+                  const dataPath = pathe.join(dataDir, `${existingId}.json`);
+
+                  try {
+                    const currentData = JSON.parse(
+                      readFileSync(dataPath, 'utf-8')
+                    );
+
+                    const next = {
+                      ...currentData,
+                      schema: {
+                        props,
+                        slots
+                      },
+                      content: {
+                        props: {
+                          ...defaults,
+                          ...(currentData?.content?.props || {})
+                        },
+                        slots: {
+                          ...(currentData?.content?.slots || {})
+                        }
+                      }
+                    };
+
+                    writeFileSync(dataPath, JSON.stringify(next, null, 2));
+                  } catch {}
+                }
+              }
+            }
+
+            if (event === 'unlink') {
+              deleteCurrentComponentId(); // If a component file was deleted, clear current selection.
+              frontmatterHashByPath.delete(path);
+              shouldReload = true;
+            }
+          } catch (err) {
+            prettyConsoleLog(
+              `Astrolab failed to refresh schema for ${pathe.basename(
+                path
+              )}: ${(err as Error).message}`,
+              'error'
+            );
+          }
+
+          if (shouldReload) {
+            invalidateVirtualModules(
+              [
+                'virtual:astrolab-component-files',
+                'virtual:astrolab-component-modules'
+              ],
+              server
+            );
           }
 
           prettyConsoleLog(
-            `Astrolab component ${event}: ${pathe.basename(file)}`
+            `Astrolab component ${event}: ${pathe.basename(path)}`
           );
         }
 
         // Refresh component data file when component is modified
-        server.watcher.on('add', (f) => invalidateIfComponent(f, 'add'));
-        server.watcher.on('change', (f) => invalidateIfComponent(f, 'change'));
-        server.watcher.on('unlink', (f) => invalidateIfComponent(f, 'unlink'));
+        server.watcher.on('add', (path) => invalidateIfComponent(path, 'add'));
+        server.watcher.on('change', (path) => {
+          invalidateIfComponent(path, 'change');
+
+          if (isLabFile(path)) {
+            updateComponentContent(path);
+          }
+        });
+        server.watcher.on('unlink', (path) =>
+          invalidateIfComponent(path, 'unlink')
+        );
       },
       'astro:server:start': ({ address }) => {
         origin = 'http://localhost:' + address.port;
@@ -263,6 +256,11 @@ function normaliseResourcePath(p: string) {
   return p;
 }
 
+/**
+ * Invalidate virtual modules in the Vite development server and trigger a full page reload.
+ * @param ids Array of module IDs to invalidate
+ * @param server Vite development server instance
+ */
 function invalidateVirtualModules(ids: string[], server: ViteDevServer) {
   if (!server) return;
 
@@ -274,12 +272,51 @@ function invalidateVirtualModules(ids: string[], server: ViteDevServer) {
   server.ws.send({ type: 'full-reload' });
 }
 
-function clearCurrentComponentState() {
-  const stateFile = fileURLToPath(
-    new URL('../data/state.json', import.meta.url)
-  );
+/**
+ * Extract and hash the frontmatter section of an Astro component file. (Used to detect changes in frontmatter)
+ * @param src Source content of an Astro component file
+ */
+function getFrontmatterHash(src: string) {
+  const frontmatter = src.match(/^---([\s\S]*?)---/)?.[1] || '';
+  return createHash('md5').update(frontmatter).digest('hex');
+}
 
-  if (existsSync(stateFile)) {
-    writeFileSync(stateFile, JSON.stringify({ currentComponentId: null }));
+/**
+ * Update the content of a component data file based on its corresponding lab JSON file.
+ * @param path Path to the lab JSON file
+ */
+function updateComponentContent(path: string) {
+  const dataDir = pathe.resolve(__dirname, '../data');
+
+  const name = pathe.basename(path, '.json');
+  const existingId = getExistingComponentId(name, undefined);
+
+  const dataPath = pathe.join(dataDir, `${existingId}.json`);
+
+  if (!existingId) return;
+
+  try {
+    const labContent = JSON.parse(readFileSync(path, 'utf-8'));
+    const currentData = JSON.parse(readFileSync(dataPath, 'utf-8'));
+
+    const next = {
+      ...currentData,
+      content: {
+        props: {
+          ...currentData?.content?.props,
+          ...labContent.props
+        },
+        slots: {
+          ...currentData?.content?.slots,
+          ...labContent.slots
+        }
+      }
+    };
+
+    writeFileSync(dataPath, JSON.stringify(next, null, 2));
+
+    prettyConsoleLog(`Astrolab lab updated: ${name}`);
+  } catch (err) {
+    prettyConsoleLog(`Astrolab failed to update lab for ${name}`, 'error');
   }
 }

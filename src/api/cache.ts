@@ -1,3 +1,4 @@
+// _astrolab/api/cache
 export const prerender = false;
 
 import { fileURLToPath } from 'url';

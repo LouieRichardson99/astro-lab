@@ -35,7 +35,7 @@ const { componentId, value, type, name } = Astro.props;
 
 <script>
   import JSON5 from 'json5';
-  import { updateComponentData } from '../services/component-data';
+  import { updateComponentContent } from '../services/component-content';
 
   class JsonEditor extends HTMLElement {
     value: unknown;
@@ -78,7 +78,7 @@ const { componentId, value, type, name } = Astro.props;
           );
           textarea.classList.remove('error');
 
-          await updateComponentData(
+          await updateComponentContent(
             this.dataset.componentId || '',
             'prop',
             textarea.name,

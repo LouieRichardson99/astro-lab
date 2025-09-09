@@ -19,7 +19,7 @@ const { component } = Astro.props;
     </thead>
     <tbody>
       {
-        component.component.props.map((prop) => (
+        component.schema.props.map((prop) => (
           <tr>
             <td class="prop-name-column">
               <pre class="prop-name">{prop.name}</pre>
@@ -27,7 +27,7 @@ const { component } = Astro.props;
             <td class="prop-value-column">
               <ComponentPropsInput
                 {prop}
-                value={component.props[prop.name]}
+                value={component.content.props[prop.name]}
                 componentId={component.id}
               />
             </td>

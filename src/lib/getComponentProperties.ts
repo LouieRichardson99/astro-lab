@@ -1,6 +1,7 @@
 import { Project } from 'ts-morph';
 import type { PropInfo } from '../types';
 import resolveType from './resolveType';
+import { getTsProject } from './tsProject';
 
 /**
  * Extracts prop information from a component's markup.
@@ -13,10 +14,8 @@ export default function getComponentProperties(
   const astroFrontmatter =
     componentMarkup.match(/^---([\s\S]*?)---/)?.[1] || '';
 
-  // Create a new TypeScript project as context for parsing
-  const project = new Project({
-    tsConfigFilePath: 'tsconfig.json'
-  });
+  // Use a cached TypeScript project to avoid expensive re-initialization
+  const project: Project = getTsProject();
 
   // Create a temporary source file to parse the Astro frontmatter
   const sourceFile = project.createSourceFile('.virtual.ts', astroFrontmatter, {

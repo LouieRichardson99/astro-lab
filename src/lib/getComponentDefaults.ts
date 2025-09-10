@@ -1,5 +1,6 @@
-import { Project, Node } from 'ts-morph';
+import { Node } from 'ts-morph';
 import JSON5 from 'json5';
+import { getTsProject } from './tsProject';
 
 /**
  * Extracts default values for props from a component's markup.
@@ -13,9 +14,8 @@ export default function getComponentDefaults(
   const astroFrontmatter =
     componentMarkup.match(/^---([\s\S]*?)---/)?.[1] || '';
 
-  const project = new Project({
-    tsConfigFilePath: 'tsconfig.json'
-  });
+  // Use a cached TypeScript project to avoid expensive re-initialization
+  const project = getTsProject();
 
   const sourceFile = project.createSourceFile('.virtual.ts', astroFrontmatter, {
     overwrite: true
@@ -38,7 +38,11 @@ export default function getComponentDefaults(
 
           // TODO: Handle parsing of object signature index if number - currently errors
 
-          defaults[name] = JSON5.parse(initializer?.getText() || 'null');
+          try {
+            defaults[name] = JSON5.parse(initializer?.getText() || 'null');
+          } catch {
+            defaults[name] = null;
+          }
         });
       }
     }

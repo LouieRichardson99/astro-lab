@@ -1,18 +1,13 @@
-import fg from 'fast-glob';
 import pathe from 'pathe';
 import fs from 'fs';
 import prettyConsoleLog from '../utils/prettyConsoleLog';
 
 export default function getComponentLab(componentName: string) {
   const labsDir = pathe.resolve(process.cwd(), 'src/labs');
-  const files = fg.sync('**/*.json', { cwd: labsDir });
+  const candidate = pathe.resolve(labsDir, `${componentName}.json`);
 
-  const lab = files.find((file) => {
-    return file === `${componentName}.json`;
-  });
-
-  if (lab) {
-    const data = fs.readFileSync(pathe.resolve(labsDir, lab), 'utf-8');
+  if (fs.existsSync(candidate)) {
+    const data = fs.readFileSync(candidate, 'utf-8');
 
     try {
       return JSON.parse(data);

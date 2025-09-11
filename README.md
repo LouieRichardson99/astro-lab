@@ -4,11 +4,12 @@ Astrolab UI is an Astro integration that brings an isolated UI development tool 
 
 ## ✨ Features
 
-- Zero-config: just add the integration and start your dev server
-- Automatic discovery of your Astro components
 - Live prop + slot playground per component
+- Automatic discovery of your Astro components
+- Populate components in playground with JSON data (Labs)
 - Hot reload of component metadata when you edit components
-- Optional global stylesheets & scripts injection for consistent preview styling
+- Zero-config: just add the integration and start your dev server
+- Optional global stylesheets & scripts injection
 
 ## 📦 Installation
 

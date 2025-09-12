@@ -43,7 +43,8 @@ export default defineConfig({
       // Optional
       componentsDir: 'src/components',
       stylesheets: ['/src/styles/global.css'],
-      scripts: ['/src/script.js']
+      scripts: ['/src/script.js'],
+      excludedComponents: ['Container']
     })
   ]
 });
@@ -98,11 +99,12 @@ Where to put lab files
 
 ## ⚙️ Options
 
-| Option          | Type       | Default            | Description                                                                                                                            |
-| --------------- | ---------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `componentsDir` | `string`   | `'src/components'` | Root (relative to project) scanned for `.astro` component files.                                                                       |
-| `stylesheets`   | `string[]` | `[]`               | List of stylesheet paths or absolute `http(s)` URLs to inject into the preview document `<head>`. Useful for global and reset styling. |
-| `scripts`       | `string[]` | `[]`               | List of script paths or absolute URLs injected at the bottom of the `<body>` element in the preview document.                          |
+| Option               | Type       | Default            | Description                                                                                                                            |
+| -------------------- | ---------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `componentsDir`      | `string`   | `'src/components'` | Root (relative to project) scanned for `.astro` component files.                                                                       |
+| `stylesheets`        | `string[]` | `[]`               | List of stylesheet paths or absolute `http(s)` URLs to inject into the preview document `<head>`. Useful for global and reset styling. |
+| `scripts`            | `string[]` | `[]`               | List of script paths or absolute URLs injected at the bottom of the `<body>` element in the preview document.                          |
+| `excludedComponents` | `string[]` | `[]`               | List of component file names (without extension) to exclude from the playground.                                                       |
 
 ## 👷🏻‍♂️ Contributions
 

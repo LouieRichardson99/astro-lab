@@ -20,6 +20,7 @@ export interface AstrolabOptions {
   stylesheets?: string[];
   scripts?: string[];
   componentsDir?: string;
+  excludedComponents?: string[];
 }
 
 let origin: string | null = null;
@@ -32,6 +33,7 @@ export default function (options?: AstrolabOptions): AstroIntegration {
     // Normalize componentsDir to a root-relative path without leading './'
     .replace(/^\.\//, '')
     .replace(/^\//, '');
+  const excludedComponents = options?.excludedComponents || [];
 
   return {
     name: 'astrolab',
@@ -95,8 +97,8 @@ export default function (options?: AstrolabOptions): AstroIntegration {
         updateConfig({
           vite: {
             plugins: [
-              astrolabComponentModulesPlugin(componentsDir),
-              astrolabComponentFilesPlugin(componentsDir),
+              astrolabComponentModulesPlugin(componentsDir, excludedComponents),
+              astrolabComponentFilesPlugin(componentsDir, excludedComponents),
               astrolabStylesheetsPlugin(stylesheets),
               astrolabScriptsPlugin(scripts)
             ],

@@ -3,7 +3,10 @@ import { randomBytes } from 'crypto';
 import fg from 'fast-glob';
 import pathe from 'pathe';
 
-export default function defineVitePlugin(componentsDir: string) {
+export default function defineVitePlugin(
+  componentsDir: string,
+  exclude: string[]
+) {
   return {
     name: 'astrolab-component-files-plugin',
     resolveId(id: string) {
@@ -15,7 +18,14 @@ export default function defineVitePlugin(componentsDir: string) {
           pathe.relative(process.cwd(), componentsDir) + '/**/*.astro'
         );
 
-        const components = files.map((file) => {
+        const filteredFiles = files.filter((file) => {
+          const name = pathe.basename(file, '.astro');
+          return !exclude.includes(name);
+        });
+
+        const components = filteredFiles.map((file) => {
+          const name = pathe.basename(file, '.astro');
+
           const abs = pathe.resolve(file);
           const existingId = getExistingComponentId(undefined, abs);
           const id =
@@ -23,7 +33,7 @@ export default function defineVitePlugin(componentsDir: string) {
 
           return {
             id,
-            name: pathe.basename(file, '.astro'),
+            name,
             path: abs
           };
         });
